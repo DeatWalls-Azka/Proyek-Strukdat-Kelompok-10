@@ -1,0 +1,23 @@
+# file hasil compile
+*.exe
+*.out
+*.o
+*.class
+
+# folder build
+build/
+bin/
+
+# file log
+*.log
+
+# file sementara editor
+*.tmp
+*.swp
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
