@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// 1. IMPLEMENTASI STRUKTUR DATA (Target Minggu 7)
+// Implementasi Struktur Data Kategori (Target Minggu 7)
 struct Kategori {
     int id_kategori;
     string nama;
@@ -39,7 +39,7 @@ Kategori* cariKategori(vector<Kategori*>& list_kat, int id_cari) {
             return hasil_anak;
         }
     }
-    return nullptr; // Benar-benar tidak ketemu
+    return nullptr; // Jika tidak ketemu di mana pun
 }
 
 
