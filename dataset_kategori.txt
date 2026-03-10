@@ -1,0 +1,6 @@
+1;Elektronik;0;1
+101;Handphone;1;2
+1011;Android;101;3
+102;Laptop;1;2
+2;Pakaian;0;1
+201;Kemeja;2;2
