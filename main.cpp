@@ -2,6 +2,9 @@
 #include <vector>
 #include <string>
 #include <fstream>  
+
+#include <unordered_map> // Untuk Hash Map O(1)
+#include <chrono>        // Untuk menghitung waktu eksekusi (profiling)
 using namespace std;
 
 // 1. DEFINISI STRUKTUR DATA (ADT)
@@ -15,6 +18,7 @@ struct Kategori {
     // Vector pointer untuk menyimpan anak-anak kategori secara dinamis
     vector<Kategori*> sub_kategori; 
 
+
     // Konstruktor untuk inisialisasi data kategori baru
     Kategori(int id, string n, int pid, int lvl) {
         id_kategori = id;
@@ -26,6 +30,9 @@ struct Kategori {
 
 // Vektor global untuk menyimpan kategori di level paling atas (Root)
 vector<Kategori*> root_kategori;
+
+// Struktur Data 2: Hash Map untuk pencarian O(1)
+ unordered_map<int, Kategori*> map_kategori;
 
 
 // 2. OPERASI UTAMA (SEARCH & INSERT)
@@ -45,10 +52,19 @@ Kategori* cariKategori(vector<Kategori*>& list_kat, int id_cari) {
     }
     return nullptr; 
 }
+ // Fungsi pencarian menggunakan Hash Map untuk O(1)
+Kategori* cariDenganHash(int id_cari) {
+    if (map_kategori.find(id_cari) != map_kategori.end()) {
+        return map_kategori[id_cari]; // Langsung ketemu O(1)
+    }
+    return nullptr;
+}
 
 // Fungsi penyisipan data kategori baru ke dalam struktur pohon
 void tambahKategori(int id, string nama, int parent_id, int level) {
     Kategori* kategori_baru = new Kategori(id, nama, parent_id, level);
+    // Di dalam fungsi tambahKategori, setelah "new Kategori(...)"
+    map_kategori[id] = kategori_baru; 
 
     if (parent_id == 0) {
         // Jika parent_id 0, otomatis menjadi Root
@@ -167,7 +183,24 @@ int main() {
         cout << "[Not Found] ID " << id_dicari << " tidak ditemukan." << endl;
     }
 
-    // Terminasi: Dealokasi memori sebelum program ditutup
+
+    // 1. Mengukur kecepatan Linked Tree (DFS)
+  auto start_tree = chrono::high_resolution_clock::now();
+  Kategori* hasil1 = cariKategori(root_kategori, id_dicari);
+  auto end_tree = chrono::high_resolution_clock::now();
+  auto durasi_tree = chrono::duration_cast<chrono::microseconds>(end_tree - start_tree).count();
+
+  // 2. Mengukur kecepatan Hash Map
+  auto start_hash = chrono::high_resolution_clock::now();
+  Kategori* hasil2 = cariDenganHash(id_dicari);
+  auto end_hash = chrono::high_resolution_clock::now();
+  auto durasi_hash = chrono::duration_cast<chrono::microseconds>(end_hash - start_hash).count();
+
+  cout << "Waktu Tree (O(n)) : " << durasi_tree << " mikrodetik\n";
+  cout << "Waktu Hash (O(1)) : " << durasi_hash << " mikrodetik\n";
+
+   
+    //  Dealokasi memori sebelum program berakhir
     hapusMemori(root_kategori); 
     cout << "\n[OK] Memori RAM dibebaskan. Program selesai." << endl;
 
