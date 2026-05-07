@@ -19,7 +19,7 @@ Program ini mengimplementasikan struktur data **Hybrid** antara **Linked Tree** 
 
 ## 📝 Deskripsi Proyek
 
-Proyek ini bertujuan untuk mensimulasikan sistem manajemen kategori pada skala industri menggunakan dataset dari **UCI Online Retail**. Dengan lebih dari **5.700 data unik**, sistem ini membandingkan efisiensi waktu eksekusi antara penelusuran pohon secara rekursif ($O(n)$) dengan pencarian langsung menggunakan tabel hash (O(1)).
+Proyek ini bertujuan untuk mensimulasikan sistem manajemen kategori pada skala industri menggunakan dataset dari **UCI Online Retail**. Dengan lebih dari **5.700 data unik**, sistem ini membandingkan efisiensi waktu eksekusi antara penelusuran pohon secara rekursif (O(n)) dengan pencarian langsung menggunakan tabel hash (O(1)).
 
 ---
 
