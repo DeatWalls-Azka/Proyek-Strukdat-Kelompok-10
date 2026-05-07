@@ -1,208 +1,116 @@
 #include <iostream>
-#include <vector>
+#include <chrono>
 #include <string>
-#include <fstream>  
+#include "Kategori.h"
 
-#include <unordered_map> // Untuk Hash Map O(1)
-#include <chrono>        // Untuk menghitung waktu eksekusi (profiling)
 using namespace std;
 
-// 1. DEFINISI STRUKTUR DATA (ADT)
-// Implementasi Non-Linear Linked Tree menggunakan pointer
-struct Kategori {
-    int id_kategori;
-    string nama;
-    int parent_id;
-    int level;
+// Fungsi Benchmark untuk Laporan Analisis Performa
+void jalankanBenchmark(int id_target) {
+    int n = 10000;
+    cout << "\n[Benchmarking] Mencari ID " << id_target << " sebanyak " << n << " kali..." << endl;
     
-    // Vector pointer untuk menyimpan anak-anak kategori secara dinamis
-    vector<Kategori*> sub_kategori; 
-
-
-    // Konstruktor untuk inisialisasi data kategori baru
-    Kategori(int id, string n, int pid, int lvl) {
-        id_kategori = id;
-        nama = n;
-        parent_id = pid;
-        level = lvl;
-    }
-};
-
-// Vektor global untuk menyimpan kategori di level paling atas (Root)
-vector<Kategori*> root_kategori;
-
-// Struktur Data 2: Hash Map untuk pencarian O(1)
- unordered_map<int, Kategori*> map_kategori;
-
-
-// 2. OPERASI UTAMA (SEARCH & INSERT)
-
-
-// Fungsi pencarian menggunakan algoritma Depth-First Search (DFS) rekursif
-Kategori* cariKategori(vector<Kategori*>& list_kat, int id_cari) {
-    for (Kategori* kat : list_kat) {
-        if (kat->id_kategori == id_cari) {
-            return kat; 
-        }
-        // Rekursi: mencari ke dalam sub-kategori jika belum ditemukan
-        Kategori* hasil_anak = cariKategori(kat->sub_kategori, id_cari);
-        if (hasil_anak != nullptr) {
-            return hasil_anak;
-        }
-    }
-    return nullptr; 
-}
- // Fungsi pencarian menggunakan Hash Map untuk O(1)
-Kategori* cariDenganHash(int id_cari) {
-    if (map_kategori.find(id_cari) != map_kategori.end()) {
-        return map_kategori[id_cari]; // Langsung ketemu O(1)
-    }
-    return nullptr;
-}
-
-// Fungsi penyisipan data kategori baru ke dalam struktur pohon
-void tambahKategori(int id, string nama, int parent_id, int level) {
-    Kategori* kategori_baru = new Kategori(id, nama, parent_id, level);
-    // Di dalam fungsi tambahKategori, setelah "new Kategori(...)"
-    map_kategori[id] = kategori_baru; 
-
-    if (parent_id == 0) {
-        // Jika parent_id 0, otomatis menjadi Root
-        root_kategori.push_back(kategori_baru);
-    } else {
-        // Cari alamat memori parent sebelum menyisipkan anak
-        Kategori* parent = cariKategori(root_kategori, parent_id);
-        if (parent != nullptr) {
-            parent->sub_kategori.push_back(kategori_baru);
-        } else {
-            cout << "[-] Gagal! Parent ID " << parent_id << " tidak ditemukan." << endl;
-            delete kategori_baru; // Hindari memory leak jika gagal insert
-        }
-    }
-}
-
-// Fungsi untuk menampilkan seluruh hierarki secara rekursif
-void tampilkanHierarki(const vector<Kategori*>& list_kat, string indentasi = "") {
-    for (Kategori* kat : list_kat) {
-        cout << indentasi << "|-- [" << kat->id_kategori << "] " << kat->nama << endl;
-        tampilkanHierarki(kat->sub_kategori, indentasi + "    ");
-    }
-}
-
-
-
-// 3. IMPLEMENTASI FILE I/O (PERSISTENT STORAGE)
-// Fungsi pembantu untuk menulis data ke file secara rekursif
-void simpanKeFileRekursif(ofstream& file, const vector<Kategori*>& list_kat) {
-    for (Kategori* kat : list_kat) {
-        // Format: ID;Nama;ParentID;Level
-        file << kat->id_kategori << ";" << kat->nama << ";" 
-             << kat->parent_id << ";" << kat->level << "\n";
-        
-        simpanKeFileRekursif(file, kat->sub_kategori);
-    }
-}
-
-// Fungsi menggunakan ofstream untuk menulis ke file eksternal
-void simpanData() {
-    ofstream file("dataset_kategori.txt"); 
-    if (file.is_open()) {
-        simpanKeFileRekursif(file, root_kategori);
-        file.close();
-        cout << "[OK] Data berhasil disimpan ke 'dataset_kategori.txt'!" << endl;
-    }
-}
-
-// Fungsi menggunakan ifstream untuk membaca data dari file eksternal
-void muatData() {
-    ifstream file("dataset_kategori.txt"); 
-    if (!file.is_open()) {
-        cout << "[!] File tidak ditemukan. Memulai dengan sesi baru." << endl;
-        return;
-    }
-
-    string id_str, nama, parent_str, level_str;
-    cout << "[OK] Memuat data dari database file..." << endl;
+    // Uji Tree (DFS) - O(n)
+    auto s1 = chrono::high_resolution_clock::now();
+    for(int i=0; i<n; i++) cariKategoriDFS(root_kategori, id_target);
+    auto e1 = chrono::high_resolution_clock::now();
     
-    // Membaca baris demi baris menggunakan delimiter ';'
-    while (getline(file, id_str, ';')) {
-        getline(file, nama, ';');
-        getline(file, parent_str, ';');
-        getline(file, level_str, '\n'); 
+    // Uji Hash Map - O(1)
+    auto s2 = chrono::high_resolution_clock::now();
+    for(int i=0; i<n; i++) cariDenganHash(id_target);
+    auto e2 = chrono::high_resolution_clock::now();
 
-        if (!id_str.empty()) {
-            tambahKategori(stoi(id_str), nama, stoi(parent_str), stoi(level_str));
-        }
+    auto durasi_tree = chrono::duration_cast<chrono::microseconds>(e1-s1).count();
+    auto durasi_hash = chrono::duration_cast<chrono::microseconds>(e2-s2).count();
+
+    cout << ">> Total Waktu Tree (DFS) : " << durasi_tree << " mks" << endl;
+    cout << ">> Total Waktu Hash Map  : " << durasi_hash << " mks" << endl;
+    
+    if (durasi_hash > 0) {
+        cout << ">> Kesimpulan: Hash Map " << (double)durasi_tree/durasi_hash << "x lebih cepat!" << endl;
     }
-    file.close();
 }
-
-
-// 4. TERMINASI & DEALOKASI MEMORI
-// Fungsi untuk membebaskan memori dinamis (mencegah memory leak)
-void hapusMemori(vector<Kategori*>& list_kat) {
-    for (Kategori* kat : list_kat) {
-        hapusMemori(kat->sub_kategori); // Post-order traversal
-        delete kat; 
-    }
-    list_kat.clear();
-}
-
 
 int main() {
-    cout << "=== SISTEM MANAJEMEN KATEGORI (PROGRES MINGGU 7) ===" << endl;
-    
-    // Inisialisasi: Memuat data dari penyimpanan sekunder
+    // Memuat data dari file saat program dijalankan
     muatData();
-
-    // Inisialisasi data awal (dummy)
-    if (root_kategori.empty()) {
-        cout << "\n[!] Data kosong, menginisialisasi dataset awal..." << endl;
-        tambahKategori(1, "Elektronik", 0, 1);
-        tambahKategori(2, "Pakaian", 0, 1);
-        tambahKategori(101, "Handphone", 1, 2);
-        tambahKategori(102, "Laptop", 1, 2);
-        tambahKategori(201, "Kemeja", 2, 2);
-        tambahKategori(1011, "Android", 101, 3); 
-        
-        simpanData(); // Langsung simpan ke file
-    }
-
-    // Siklus Operasi: Menampilkan data ke layar
-    cout << "\n=== STRUKTUR HIERARKI KATEGORI ===" << endl;
-    tampilkanHierarki(root_kategori);
-
-    // Uji Operasi Pencarian (Search)
-    cout << "\n=== PENGUJIAN FUNGSI SEARCH ===" << endl;
-    int id_dicari = 101;
-    Kategori* hasil = cariKategori(root_kategori, id_dicari);
     
-    if (hasil != nullptr) {
-        cout << "[Found] ID: " << hasil->id_kategori << " | Nama: " << hasil->nama << endl;
-    } else {
-        cout << "[Not Found] ID " << id_dicari << " tidak ditemukan." << endl;
-    }
+    int pilihan, id, p_id, lvl, status_input;
+    string nama;
 
+    do {
+        cout << "\n============================================";
+        cout << "\n   FINAL PROJECT: SISTEM MONITORING KATEGORI";
+        cout << "\n============================================";
+        cout << "\n1. Tampilkan Hierarki Kategori";
+        cout << "\n2. Tambah Kategori Baru (+ Status)";
+        cout << "\n3. Update Nama Kategori";
+        cout << "\n4. Hapus Kategori & Sub-Kategori";
+        cout << "\n5. Urutkan Kategori (A-Z)";
+        cout << "\n6. Uji Performa Pencarian (Benchmarking)";
+        cout << "\n7. Monitoring Penggunaan Memori (RAM)"; // <-- Syarat PDF
+        cout << "\n0. Simpan & Keluar";
+        cout << "\n--------------------------------------------";
+        cout << "\nPilih Menu: "; cin >> pilihan;
 
-    // 1. Mengukur kecepatan Linked Tree (DFS)
-  auto start_tree = chrono::high_resolution_clock::now();
-  Kategori* hasil1 = cariKategori(root_kategori, id_dicari);
-  auto end_tree = chrono::high_resolution_clock::now();
-  auto durasi_tree = chrono::duration_cast<chrono::microseconds>(end_tree - start_tree).count();
+        switch(pilihan) {
+            case 1:
+                cout << "\n--- STRUKTUR HIERARKI KATEGORI ---\n";
+                tampilkanHierarki(root_kategori);
+                break;
 
-  // 2. Mengukur kecepatan Hash Map
-  auto start_hash = chrono::high_resolution_clock::now();
-  Kategori* hasil2 = cariDenganHash(id_dicari);
-  auto end_hash = chrono::high_resolution_clock::now();
-  auto durasi_hash = chrono::duration_cast<chrono::microseconds>(end_hash - start_hash).count();
+            case 2:
+                cout << "\n--- INPUT DATA BARU ---" << endl;
+                cout << "ID Kategori  : "; cin >> id;
+                cout << "Nama Kategori: "; cin.ignore(); getline(cin, nama);
+                cout << "Parent ID    : "; cin >> p_id;
+                cout << "Level        : "; cin >> lvl;
+                cout << "Status (1:Aktif, 0:Nonaktif): "; cin >> status_input; // <-- Syarat Asdos
+                tambahKategori(id, nama, p_id, lvl, status_input);
+                cout << "[OK] Kategori berhasil ditambahkan." << endl;
+                break;
 
-  cout << "Waktu Tree (O(n)) : " << durasi_tree << " mikrodetik\n";
-  cout << "Waktu Hash (O(1)) : " << durasi_hash << " mikrodetik\n";
+            case 3:
+                cout << "Masukkan ID yang diupdate: "; cin >> id;
+                if(map_kategori.count(id)) {
+                    cout << "Nama Baru: "; cin.ignore(); getline(cin, nama);
+                    map_kategori[id]->nama = nama;
+                    cout << "[OK] Nama diperbarui." << endl;
+                } else cout << "[!] ID tidak ditemukan." << endl;
+                break;
 
-   
-    //  Dealokasi memori sebelum program berakhir
-    hapusMemori(root_kategori); 
-    cout << "\n[OK] Memori RAM dibebaskan. Program selesai." << endl;
+            case 4:
+                cout << "Masukkan ID yang akan dihapus: "; cin >> id;
+                if(map_kategori.count(id)) {
+                    hapusKategoriRecursive(id);
+                    cout << "[OK] Kategori dan turunannya berhasil dihapus." << endl;
+                } else cout << "[!] ID tidak ditemukan." << endl;
+                break;
+
+            case 5:
+                urutkanKategori(root_kategori);
+                cout << "[OK] Data diurutkan berdasarkan abjad." << endl;
+                break;
+
+            case 6:
+                cout << "Masukkan ID Target untuk Uji Kecepatan: "; cin >> id;
+                jalankanBenchmark(id);
+                break;
+
+            case 7:
+                hitungEstimasiMemori(); // <-- Memanggil fungsi baru kamu
+                break;
+
+            case 0:
+                simpanData();
+                cout << "[OK] Data tersimpan. Program berhenti." << endl;
+                break;
+
+            default:
+                cout << "[!] Pilihan tidak tersedia." << endl;
+        }
+
+    } while (pilihan != 0);
 
     return 0;
 }
