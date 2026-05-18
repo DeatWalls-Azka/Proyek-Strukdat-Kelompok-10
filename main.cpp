@@ -92,13 +92,53 @@ int main() {
                 cout << "[OK] Data diurutkan berdasarkan abjad." << endl;
                 break;
 
-            case 6:
-                cout << "Masukkan ID Target untuk Uji Kecepatan: "; cin >> id;
-                jalankanBenchmark(id);
-                break;
+            case 6: { // Di-bunder/dibungkus kurung kurawal agar terhindar dari compiler error initialization
+                cout << "\nPilih Metode Pencarian:\n1. Cari berdasarkan ID (Benchmark Tree vs Hash Map)\n2. Cari berdasarkan Nama\nPilihan: ";
+                int pil_cari;
+                cin >> pil_cari;
+
+                if (pil_cari == 1) {
+                    int id_target;
+                    cout << "Masukkan ID Kategori: ";
+                    cin >> id_target;
+                    
+                    // Validasi eksistensi data ID sebelum di-benchmark
+                    if (map_kategori.count(id_target)) {
+                        cout << "\n[DATA DITEMUKAN]" << endl;
+                        cout << ">> Nama Kategori : " << map_kategori[id_target]->nama << endl;
+                        cout << ">> Level/Depth    : " << map_kategori[id_target]->level << endl;
+                        jalankanBenchmark(id_target);
+                    } else {
+                        cout << "[!] ID Kategori tidak ditemukan di dalam dataset.\n";
+                    }
+                } else {
+                    string nama_target;
+                    cout << "Masukkan Nama Kategori: ";
+                    cin.ignore();
+                    getline(cin, nama_target);
+                    
+                    // Uji performa pencarian nama (DFS) menggunakan tracker waktu chrono
+                    auto mulai_nama = chrono::high_resolution_clock::now();
+                    Kategori* hasil = cariDenganNama(root_kategori, nama_target);
+                    auto selesai_nama = chrono::high_resolution_clock::now();
+                    chrono::duration<double, micro> durasi_nama = selesai_nama - mulai_nama;
+
+                    if (hasil) {
+                        cout << "\n[DATA DITEMUKAN]" << endl;
+                        cout << ">> ID Kategori   : " << hasil->id_kategori << endl;
+                        cout << ">> Level/Depth   : " << hasil->level << endl;
+                        cout << ">> Status        : " << ((hasil->status == 1) ? "Aktif" : "Nonaktif") << endl;
+                        cout << "--------------------------------------" << endl;
+                        cout << ">> Waktu Cari Nama (DFS) : " << durasi_nama.count() << " mikrodetik" << endl;
+                    } else {
+                        cout << "\n[!] Kategori dengan nama '" << nama_target << "' tidak ditemukan.\n";
+                    }
+                }
+                break; // Menghindari bug fall-through ke case 7
+            }
 
             case 7:
-                hitungEstimasiMemori(); // <-- Memanggil fungsi baru kamu
+                hitungEstimasiMemori(); 
                 break;
 
             case 0:

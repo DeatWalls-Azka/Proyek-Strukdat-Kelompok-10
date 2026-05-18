@@ -118,3 +118,16 @@ void hitungEstimasiMemori() {
     cout << ">> Estimasi RAM Hash Map: " << (double)memori_hash / 1024 << " KB" << endl;
     cout << "Kesimpulan: Hash Map memakan memori sedikit lebih besar (~1.5x) demi kecepatan O(1)." << endl;
 }
+
+
+Kategori* cariDenganNama(const vector<Kategori*>& list_kat, string nama_target) {
+    for (Kategori* kat : list_kat) {
+        // Menggunakan pencarian case-insensitive atau exact match
+        if (kat->nama == nama_target) return kat;
+        
+        // Rekursif cari ke anak-anaknya
+        Kategori* hasil = cariDenganNama(kat->sub_kategori, nama_target);
+        if (hasil) return hasil;
+    }
+    return nullptr;
+}
