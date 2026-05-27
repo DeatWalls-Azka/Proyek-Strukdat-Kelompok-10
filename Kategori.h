@@ -36,8 +36,10 @@ void hapusKategoriRecursive(int id);
 void urutkanKategori(vector<Kategori*>& list_kat);
 Kategori* cariDenganHash(int id_target);
 Kategori* cariKategoriDFS(const vector<Kategori*>& list_kat, int id_target);
+Kategori* cariDenganNama(const vector<Kategori*>& list_kat, string nama_target);
 void tampilkanHierarki(const vector<Kategori*>& list_kat, string indent = "");
 void tampilkanHierarkiTerbatas(const vector<Kategori*>& list_kat, int batas);
 void hitungEstimasiMemori();
+
 
 #endif
