@@ -59,7 +59,7 @@ void simpanKeFileRekursif(ofstream& file, const vector<Kategori*>& list_kat) {
 }
 
 void simpanData() {
-    ofstream file("dataset_kategori.txt");
+    ofstream file("dataset_kategori_backup.txt");
     if (file.is_open()) {
         simpanKeFileRekursif(file, root_kategori);
         file.close();
@@ -68,7 +68,7 @@ void simpanData() {
 
 // Update: Membaca 5 kolom dari dataset_kategori.txt
 void muatData() {
-    ifstream file("dataset_kategori.txt");
+    ifstream file("dataset_kategori_backup.txt");
     string id_s, nama, p_id_s, lvl_s, status_s;
     if (!file.is_open()) return;
 
@@ -105,6 +105,42 @@ void tampilkanHierarki(const vector<Kategori*>& list_kat, string indent) {
         cout << indent << "|-- [" << kat->id_kategori << "] " << kat->nama << " (" << txt_status << ")" << endl;
         tampilkanHierarki(kat->sub_kategori, indent + "    ");
     }
+}
+
+void tampilkanHierarkiTerbatasHelper(
+    const vector<Kategori*>& list_kat,
+    string indent,
+    int& jumlah_tampil,
+    int batas
+) {
+    for (Kategori* kat : list_kat) {
+        if (jumlah_tampil >= batas) {
+            return;
+        }
+
+        string txt_status = (kat->status == 1) ? "Aktif" : "Nonaktif";
+
+        cout << indent << "|-- [" << kat->id_kategori << "] "
+             << kat->nama << " (" << txt_status << ")" << endl;
+
+        jumlah_tampil++;
+
+        tampilkanHierarkiTerbatasHelper(
+            kat->sub_kategori,
+            indent + "    ",
+            jumlah_tampil,
+            batas
+        );
+    }
+}
+
+void tampilkanHierarkiTerbatas(const vector<Kategori*>& list_kat, int batas) {
+    int jumlah_tampil = 0;
+
+    tampilkanHierarkiTerbatasHelper(list_kat, "", jumlah_tampil, batas);
+
+    cout << "\n[Info] Menampilkan " << jumlah_tampil
+         << " data teratas dari struktur hierarki." << endl;
 }
 
 void hitungEstimasiMemori() {

@@ -43,12 +43,13 @@ int main() {
         cout << "\n   FINAL PROJECT: SISTEM MONITORING KATEGORI";
         cout << "\n============================================";
         cout << "\n1. Tampilkan Hierarki Kategori";
-        cout << "\n2. Tambah Kategori Baru (+ Status)";
-        cout << "\n3. Update Nama Kategori";
-        cout << "\n4. Hapus Kategori & Sub-Kategori";
-        cout << "\n5. Urutkan Kategori (A-Z)";
-        cout << "\n6. Uji Performa Pencarian (Benchmarking)";
-        cout << "\n7. Monitoring Penggunaan Memori (RAM)"; // <-- Syarat PDF
+        cout << "\n2. Tampilkan Hierarki Kategori Terbatas (50 Data Teratas)"; 
+        cout << "\n3. Tambah Kategori Baru (+ Status)";
+        cout << "\n4. Update Nama Kategori";
+        cout << "\n5. Hapus Kategori & Sub-Kategori";
+        cout << "\n6. Urutkan Kategori (A-Z)";
+        cout << "\n7. Uji Performa Pencarian (Benchmarking)";
+        cout << "\n8. Monitoring Penggunaan Memori (RAM)"; // <-- Syarat PDF
         cout << "\n0. Simpan & Keluar";
         cout << "\n--------------------------------------------";
         cout << "\nPilih Menu: "; cin >> pilihan;
@@ -60,6 +61,11 @@ int main() {
                 break;
 
             case 2:
+                cout << "\n--- STRUKTUR HIERARKI KATEGORI (50 DATA TERATAS) ---\n";
+                tampilkanHierarkiTerbatas(root_kategori, 50);
+                break;
+
+            case 3:
                 cout << "\n--- INPUT DATA BARU ---" << endl;
                 cout << "ID Kategori  : "; cin >> id;
                 cout << "Nama Kategori: "; cin.ignore(); getline(cin, nama);
@@ -70,7 +76,7 @@ int main() {
                 cout << "[OK] Kategori berhasil ditambahkan." << endl;
                 break;
 
-            case 3:
+            case 4:
                 cout << "Masukkan ID yang diupdate: "; cin >> id;
                 if(map_kategori.count(id)) {
                     cout << "Nama Baru: "; cin.ignore(); getline(cin, nama);
@@ -79,7 +85,7 @@ int main() {
                 } else cout << "[!] ID tidak ditemukan." << endl;
                 break;
 
-            case 4:
+            case 5:
                 cout << "Masukkan ID yang akan dihapus: "; cin >> id;
                 if(map_kategori.count(id)) {
                     hapusKategoriRecursive(id);
@@ -87,17 +93,17 @@ int main() {
                 } else cout << "[!] ID tidak ditemukan." << endl;
                 break;
 
-            case 5:
+            case 6:
                 urutkanKategori(root_kategori);
                 cout << "[OK] Data diurutkan berdasarkan abjad." << endl;
                 break;
 
-            case 6:
+            case 7:
                 cout << "Masukkan ID Target untuk Uji Kecepatan: "; cin >> id;
                 jalankanBenchmark(id);
                 break;
 
-            case 7:
+            case 8:
                 hitungEstimasiMemori(); // <-- Memanggil fungsi baru kamu
                 break;
 
