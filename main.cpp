@@ -141,30 +141,58 @@ int main() {
         cout << "\n   FINAL PROJECT: SISTEM MONITORING KATEGORI";
         cout << "\n============================================";
         cout << "\n1. Tampilkan Hierarki Kategori";
-        cout << "\n2. Tampilkan Hierarki Kategori Terbatas (50 Data Teratas)"; 
-        cout << "\n3. Tambah Kategori Baru (+ Status)";
-        cout << "\n4. Update Nama Kategori";
-        cout << "\n5. Hapus Kategori & Sub-Kategori";
-        cout << "\n6. Urutkan Kategori (A-Z)";
-        cout << "\n7. Uji Performa Pencarian (Benchmarking)";
-        cout << "\n8. Monitoring Penggunaan Memori (RAM)";
-        cout << "\n9. Uji Kecepatan Pencarian Level 2, 3, 4, dan 5";
+        cout << "\n2. Tambah Kategori Baru (+ Status)";
+        cout << "\n3. Update Nama Kategori";
+        cout << "\n4. Hapus Kategori & Sub-Kategori";
+        cout << "\n5. Urutkan Kategori (A-Z)";
+        cout << "\n6. Uji Performa Pencarian (Benchmarking)";
+        cout << "\n7. Monitoring Penggunaan Memori (RAM)";
         cout << "\n0. Simpan & Keluar";
         cout << "\n--------------------------------------------";
         cout << "\nPilih Menu: "; cin >> pilihan;
 
         switch(pilihan) {
-            case 1:
-                cout << "\n--- STRUKTUR HIERARKI KATEGORI ---\n";
-                tampilkanHierarki(root_kategori);
+            case 1: {
+                int pilihan_tampil;
+
+                cout << "\n--- MENU TAMPILKAN DATA KATEGORI ---";
+                cout << "\n1. Tampilkan Semua Hierarki";
+                cout << "\n2. Tampilkan 50 Data Hierarki Teratas";
+                cout << "\n3. Tampilkan Data Berdasarkan Subkategori";
+                cout << "\nPilih Tampilan: ";
+                cin >> pilihan_tampil;
+
+                if (pilihan_tampil == 1)
+                {
+                    cout << "\n--- STRUKTUR HIERARKI KATEGORI LENGKAP ---\n";
+                    tampilkanHierarki(root_kategori);
+                }
+                else if (pilihan_tampil == 2)
+                {
+                    cout << "\n--- STRUKTUR HIERARKI KATEGORI (50 DATA TERATAS) ---\n";
+                    tampilkanHierarkiTerbatas(root_kategori, 50);
+                }
+                else if (pilihan_tampil == 3)
+                {
+                    int id_subkategori;
+
+                    cout << "\n--- DAFTAR SUBKATEGORI YANG TERSEDIA ---\n";
+                    tampilkanDaftarSubkategoriNonLeaf(root_kategori);
+
+                    cout << "\nMasukkan ID subkategori yang ingin ditampilkan datanya: ";
+                    cin >> id_subkategori;
+
+                    tampilkanDataLeafBerdasarkanSubkategori(id_subkategori);
+                }
+                else
+                {
+                    cout << "[!] Pilihan tampilan tidak tersedia." << endl;
+                }
+
                 break;
+            }
 
             case 2:
-                cout << "\n--- STRUKTUR HIERARKI KATEGORI (50 DATA TERATAS) ---\n";
-                tampilkanHierarkiTerbatas(root_kategori, 50);
-                break;
-
-            case 3:
                 cout << "\n--- INPUT DATA BARU ---" << endl;
                 cout << "ID Kategori  : "; cin >> id;
                 cout << "Nama Kategori: "; cin.ignore(); getline(cin, nama);
@@ -175,7 +203,7 @@ int main() {
                 cout << "[OK] Kategori berhasil ditambahkan." << endl;
                 break;
 
-            case 4:
+            case 3:
                 cout << "Masukkan ID yang diupdate: "; cin >> id;
                 if(map_kategori.count(id)) {
                     cout << "Nama Baru: "; cin.ignore(); getline(cin, nama);
@@ -184,7 +212,7 @@ int main() {
                 } else cout << "[!] ID tidak ditemukan." << endl;
                 break;
 
-            case 5:
+            case 4:
                 cout << "Masukkan ID yang akan dihapus: "; cin >> id;
                 if(map_kategori.count(id)) {
                     hapusKategoriRecursive(id);
@@ -192,12 +220,12 @@ int main() {
                 } else cout << "[!] ID tidak ditemukan." << endl;
                 break;
 
-            case 6:
+            case 5:
                 urutkanKategori(root_kategori);
                 cout << "[OK] Data diurutkan berdasarkan abjad." << endl;
                 break;
 
-            case 7: { // Di-bunder/dibungkus kurung kurawal agar terhindar dari compiler error initialization
+            case 6: { // Di-bunder/dibungkus kurung kurawal agar terhindar dari compiler error initialization
                 cout << "\nPilih Metode Pencarian:\n1. Cari berdasarkan ID (Benchmark Tree vs Hash Map)\n2. Cari berdasarkan Nama\nPilihan: ";
                 int pil_cari;
                 cin >> pil_cari;
@@ -242,12 +270,8 @@ int main() {
                 break; // Menghindari bug fall-through ke case 7
             }
 
-            case 8:
+            case 7:
                 hitungEstimasiMemori(); 
-                break;
-
-            case 9:
-                benchmarkLevel2Sampai5();
                 break;    
 
             case 0:

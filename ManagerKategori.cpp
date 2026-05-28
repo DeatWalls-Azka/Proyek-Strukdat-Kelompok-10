@@ -167,3 +167,73 @@ Kategori* cariDenganNama(const vector<Kategori*>& list_kat, string nama_target) 
     }
     return nullptr;
 }
+
+void tampilkanDaftarSubkategoriNonLeaf(const vector<Kategori*>& list_kat, string indent)
+{
+    for (Kategori* kat : list_kat)
+    {
+        // Tampilkan hanya kategori/subkategori yang masih punya anak
+        if (!kat->sub_kategori.empty())
+        {
+            cout << indent << "[" << kat->id_kategori << "] "
+                 << kat->nama
+                 << " | Level: " << kat->level
+                 << endl;
+        }
+
+        tampilkanDaftarSubkategoriNonLeaf(kat->sub_kategori, indent + "    ");
+    }
+}
+
+void tampilkanDataLeafRekursif(Kategori* kat, int& jumlah_data)
+{
+    if (kat == nullptr)
+    {
+        return;
+    }
+
+    // Kalau tidak punya anak, berarti ini data paling bawah / data produk
+    if (kat->sub_kategori.empty())
+    {
+        cout << jumlah_data + 1 << ". "
+             << "[" << kat->id_kategori << "] "
+             << kat->nama
+             << " - "
+             << ((kat->status == 1) ? "Aktif" : "Nonaktif")
+             << endl;
+
+        jumlah_data++;
+        return;
+    }
+
+    // Kalau masih punya anak, lanjut telusuri anak-anaknya
+    for (Kategori* anak : kat->sub_kategori)
+    {
+        tampilkanDataLeafRekursif(anak, jumlah_data);
+    }
+}
+
+void tampilkanDataLeafBerdasarkanSubkategori(int id_subkategori)
+{
+    Kategori* target = cariDenganHash(id_subkategori);
+
+    if (target == nullptr)
+    {
+        cout << "[!] ID subkategori tidak ditemukan." << endl;
+        return;
+    }
+
+    cout << "\n--- DATA PADA SUBKATEGORI TERPILIH ---" << endl;
+    cout << "Subkategori : [" << target->id_kategori << "] "
+         << target->nama << endl;
+    cout << "Level       : " << target->level << endl;
+    cout << "----------------------------------------" << endl;
+
+    int jumlah_data = 0;
+
+    tampilkanDataLeafRekursif(target, jumlah_data);
+
+    cout << "----------------------------------------" << endl;
+    cout << "[INFO] Total data ditemukan: "
+         << jumlah_data << endl;
+}

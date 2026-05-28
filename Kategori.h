@@ -40,6 +40,9 @@ Kategori* cariDenganNama(const vector<Kategori*>& list_kat, string nama_target);
 void tampilkanHierarki(const vector<Kategori*>& list_kat, string indent = "");
 void tampilkanHierarkiTerbatas(const vector<Kategori*>& list_kat, int batas);
 void hitungEstimasiMemori();
+void tampilkanDaftarSubkategoriNonLeaf(const vector<Kategori*>& list_kat, string indent = "");
+void tampilkanDataLeafBerdasarkanSubkategori(int id_subkategori);
+void tampilkanDataLeafRekursif(Kategori* kat, int& jumlah_data);
 
 
 #endif
