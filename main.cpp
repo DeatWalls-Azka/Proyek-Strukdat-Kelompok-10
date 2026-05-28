@@ -1,7 +1,10 @@
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <iomanip>
+#include <vector>
 #include "Kategori.h"
+
 
 using namespace std;
 
@@ -31,6 +34,101 @@ void jalankanBenchmark(int id_target) {
     }
 }
 
+void kumpulkanIdBerdasarkanLevel(
+    const vector<Kategori*>& list_kat,
+    int level_target,
+    vector<int>& daftar_id
+) {
+    for (Kategori* kat : list_kat) {
+        if (kat->level == level_target) {
+            daftar_id.push_back(kat->id_kategori);
+        }
+
+        kumpulkanIdBerdasarkanLevel(kat->sub_kategori, level_target, daftar_id);
+    }
+}
+
+void benchmarkPencarianPerLevel(int level_target) {
+    vector<int> daftar_id;
+    kumpulkanIdBerdasarkanLevel(root_kategori, level_target, daftar_id);
+
+    if (daftar_id.empty()) {
+        cout << "\n[!] Tidak ada data pada level " << level_target << endl;
+        return;
+    }
+
+    int pengulangan = 10;
+    long long total_pencarian = (long long) daftar_id.size() * pengulangan;
+
+    int jumlah_ketemu_dfs = 0;
+    int jumlah_ketemu_hash = 0;
+
+    auto mulai_dfs = chrono::high_resolution_clock::now();
+
+    for (int ulang = 0; ulang < pengulangan; ulang++) {
+        for (int id : daftar_id) {
+            if (cariKategoriDFS(root_kategori, id) != nullptr) {
+                jumlah_ketemu_dfs++;
+            }
+        }
+    }
+
+    auto selesai_dfs = chrono::high_resolution_clock::now();
+
+    auto mulai_hash = chrono::high_resolution_clock::now();
+
+    for (int ulang = 0; ulang < pengulangan; ulang++) {
+        for (int id : daftar_id) {
+            if (cariDenganHash(id) != nullptr) {
+                jumlah_ketemu_hash++;
+            }
+        }
+    }
+
+    auto selesai_hash = chrono::high_resolution_clock::now();
+
+    auto durasi_dfs_ns = chrono::duration_cast<chrono::nanoseconds>(
+        selesai_dfs - mulai_dfs
+    ).count();
+
+    auto durasi_hash_ns = chrono::duration_cast<chrono::nanoseconds>(
+        selesai_hash - mulai_hash
+    ).count();
+
+    double rata_dfs = (double) durasi_dfs_ns / total_pencarian;
+    double rata_hash = (double) durasi_hash_ns / total_pencarian;
+
+    cout << "\n=== BENCHMARK PENCARIAN LEVEL " << level_target << " ===" << endl;
+    cout << "Jumlah data pada level " << level_target << " : " << daftar_id.size() << endl;
+    cout << "Total pengulangan pencarian     : " << total_pencarian << " kali" << endl;
+
+    cout << fixed << setprecision(3);
+
+    cout << "\n[DFS / Tree Search]" << endl;
+    cout << "Total waktu : " << durasi_dfs_ns / 1000.0 << " mikrodetik" << endl;
+    cout << "Rata-rata   : " << rata_dfs << " nanodetik per pencarian" << endl;
+    cout << "Data ketemu : " << jumlah_ketemu_dfs << endl;
+
+    cout << "\n[Hash Map Search]" << endl;
+    cout << "Total waktu : " << durasi_hash_ns / 1000.0 << " mikrodetik" << endl;
+    cout << "Rata-rata   : " << rata_hash << " nanodetik per pencarian" << endl;
+    cout << "Data ketemu : " << jumlah_ketemu_hash << endl;
+
+    if (durasi_hash_ns > 0) {
+        cout << "\nKesimpulan: Hash Map sekitar "
+             << (double) durasi_dfs_ns / durasi_hash_ns
+             << "x lebih cepat dibanding DFS pada level "
+             << level_target << "." << endl;
+    }
+}
+
+void benchmarkLevel2Sampai5() {
+    benchmarkPencarianPerLevel(2);
+    benchmarkPencarianPerLevel(3);
+    benchmarkPencarianPerLevel(4);
+    benchmarkPencarianPerLevel(5);
+}
+
 int main() {
     // Memuat data dari file saat program dijalankan
     muatData();
@@ -49,7 +147,8 @@ int main() {
         cout << "\n5. Hapus Kategori & Sub-Kategori";
         cout << "\n6. Urutkan Kategori (A-Z)";
         cout << "\n7. Uji Performa Pencarian (Benchmarking)";
-        cout << "\n8. Monitoring Penggunaan Memori (RAM)"; // <-- Syarat PDF
+        cout << "\n8. Monitoring Penggunaan Memori (RAM)";
+        cout << "\n9. Uji Kecepatan Pencarian Level 2, 3, 4, dan 5";
         cout << "\n0. Simpan & Keluar";
         cout << "\n--------------------------------------------";
         cout << "\nPilih Menu: "; cin >> pilihan;
@@ -146,6 +245,10 @@ int main() {
             case 8:
                 hitungEstimasiMemori(); 
                 break;
+
+            case 9:
+                benchmarkLevel2Sampai5();
+                break;    
 
             case 0:
                 simpanData();
