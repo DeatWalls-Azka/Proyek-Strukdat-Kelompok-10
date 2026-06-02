@@ -30,8 +30,9 @@ extern unordered_map<int, Kategori*> map_kategori;
 void muatData();
 void simpanData();
 
-// Prototype tambahKategori juga harus 5 parameter agar tidak error 'too many arguments'
-void tambahKategori(int id, string nama, int parent_id, int level, int status);
+bool tambahKategori(int id, string nama, int parent_id, int status);
+bool tambahKategoriDenganLevel(int id, string nama, int parent_id, int level, int status);
+bool pindahParentKategori(int id, int parent_id_baru);
 void hapusKategoriRecursive(int id);
 void urutkanKategori(vector<Kategori*>& list_kat);
 Kategori* cariDenganHash(int id_target);
@@ -41,6 +42,7 @@ void tampilkanHierarki(const vector<Kategori*>& list_kat, string indent = "");
 void tampilkanHierarkiTerbatas(const vector<Kategori*>& list_kat, int batas);
 void hitungEstimasiMemori();
 void tampilkanDaftarSubkategoriNonLeaf(const vector<Kategori*>& list_kat, string indent = "");
+void tampilkanSemuaSubkategoriBerdasarkanKategori(int id_kategori);
 void tampilkanDataLeafBerdasarkanSubkategori(int id_subkategori);
 void tampilkanDataLeafRekursif(Kategori* kat, int& jumlah_data);
 

@@ -6,9 +6,14 @@
 vector<Kategori*> root_kategori;
 unordered_map<int, Kategori*> map_kategori;
 
-// Update: Sekarang menerima 5 parameter (tambah status)
-void tambahKategori(int id, string nama, int parent_id, int level, int status) {
-    if (map_kategori.count(id)) return;
+const string DATA_FILE = "dataset_kategori.txt";
+
+bool tambahKategoriDenganLevel(int id, string nama, int parent_id, int level, int status) {
+    if (map_kategori.count(id)) return false;
+
+    if (parent_id != 0 && !map_kategori.count(parent_id)) {
+        return false;
+    }
 
     // Pastikan status dikirim ke constructor Kategori
     Kategori* baru = new Kategori(id, nama, parent_id, level, status);
@@ -18,8 +23,78 @@ void tambahKategori(int id, string nama, int parent_id, int level, int status) {
         root_kategori.push_back(baru);
     } else {
         Kategori* parent = map_kategori[parent_id];
-        if (parent) parent->sub_kategori.push_back(baru);
+        parent->sub_kategori.push_back(baru);
     }
+
+    return true;
+}
+
+bool tambahKategori(int id, string nama, int parent_id, int status) {
+    int level_otomatis = 1;
+
+    if (parent_id != 0) {
+        if (!map_kategori.count(parent_id)) return false;
+
+        level_otomatis = map_kategori[parent_id]->level + 1;
+    }
+
+    return tambahKategoriDenganLevel(id, nama, parent_id, level_otomatis, status);
+}
+
+bool apakahTurunan(Kategori* parent, int id_dicari) {
+    if (parent == nullptr) return false;
+
+    for (Kategori* anak : parent->sub_kategori) {
+        if (anak->id_kategori == id_dicari) return true;
+        if (apakahTurunan(anak, id_dicari)) return true;
+    }
+
+    return false;
+}
+
+void updateLevelTurunan(Kategori* kat, int level_baru) {
+    if (kat == nullptr) return;
+
+    kat->level = level_baru;
+
+    for (Kategori* anak : kat->sub_kategori) {
+        updateLevelTurunan(anak, level_baru + 1);
+    }
+}
+
+bool pindahParentKategori(int id, int parent_id_baru) {
+    if (!map_kategori.count(id)) return false;
+    if (id == parent_id_baru) return false;
+    if (parent_id_baru != 0 && !map_kategori.count(parent_id_baru)) return false;
+
+    Kategori* target = map_kategori[id];
+
+    if (parent_id_baru != 0 && apakahTurunan(target, parent_id_baru)) {
+        return false;
+    }
+
+    if (target->parent_id == 0) {
+        root_kategori.erase(remove(root_kategori.begin(), root_kategori.end(), target), root_kategori.end());
+    } else {
+        Kategori* parent_lama = map_kategori[target->parent_id];
+        parent_lama->sub_kategori.erase(
+            remove(parent_lama->sub_kategori.begin(), parent_lama->sub_kategori.end(), target),
+            parent_lama->sub_kategori.end()
+        );
+    }
+
+    target->parent_id = parent_id_baru;
+
+    if (parent_id_baru == 0) {
+        root_kategori.push_back(target);
+        updateLevelTurunan(target, 1);
+    } else {
+        Kategori* parent_baru = map_kategori[parent_id_baru];
+        parent_baru->sub_kategori.push_back(target);
+        updateLevelTurunan(target, parent_baru->level + 1);
+    }
+
+    return true;
 }
 
 void hapusKategoriRecursive(int id) {
@@ -59,7 +134,7 @@ void simpanKeFileRekursif(ofstream& file, const vector<Kategori*>& list_kat) {
 }
 
 void simpanData() {
-    ofstream file("dataset_kategori_backup.txt");
+    ofstream file(DATA_FILE);
     if (file.is_open()) {
         simpanKeFileRekursif(file, root_kategori);
         file.close();
@@ -68,18 +143,18 @@ void simpanData() {
 
 // Update: Membaca 5 kolom dari dataset_kategori.txt
 void muatData() {
-    ifstream file("dataset_kategori_backup.txt");
+    ifstream file(DATA_FILE);
     string id_s, nama, p_id_s, lvl_s, status_s;
     if (!file.is_open()) return;
 
     while (getline(file, id_s, ';')) {
-        getline(file, nama, ';');
-        getline(file, p_id_s, ';');
-        getline(file, lvl_s, ';');   // Ubah delimiter ke ';' karena ada kolom status setelahnya
-        getline(file, status_s, '\n'); // Status adalah kolom terakhir (sampai baris baru)
+        if (!getline(file, nama, ';')) break;
+        if (!getline(file, p_id_s, ';')) break;
+        if (!getline(file, lvl_s, ';')) break;   // Ubah delimiter ke ';' karena ada kolom status setelahnya
+        if (!getline(file, status_s, '\n')) break; // Status adalah kolom terakhir (sampai baris baru)
         
         if (!id_s.empty()) {
-            tambahKategori(stoi(id_s), nama, stoi(p_id_s), stoi(lvl_s), stoi(status_s));
+            tambahKategoriDenganLevel(stoi(id_s), nama, stoi(p_id_s), stoi(lvl_s), stoi(status_s));
         }
     }
     file.close();
@@ -146,13 +221,15 @@ void tampilkanHierarkiTerbatas(const vector<Kategori*>& list_kat, int batas) {
 void hitungEstimasiMemori() {
     size_t jumlah_node = map_kategori.size();
     size_t memori_tree = jumlah_node * sizeof(Kategori);
-    size_t memori_hash = jumlah_node * (sizeof(int) + sizeof(Kategori*) + 8); 
+    size_t memori_hash_index = jumlah_node * (sizeof(int) + sizeof(Kategori*) + 8);
+    size_t memori_hybrid = memori_tree + memori_hash_index;
 
     cout << "\n=== ESTIMASI PENGGUNAAN MEMORI ===" << endl;
     cout << ">> Total Data: " << jumlah_node << " entitas" << endl;
-    cout << ">> Estimasi RAM Tree: " << (double)memori_tree / 1024 << " KB" << endl;
-    cout << ">> Estimasi RAM Hash Map: " << (double)memori_hash / 1024 << " KB" << endl;
-    cout << "Kesimpulan: Hash Map memakan memori sedikit lebih besar (~1.5x) demi kecepatan O(1)." << endl;
+    cout << ">> Estimasi RAM Tree saja: " << (double)memori_tree / 1024 << " KB" << endl;
+    cout << ">> Estimasi RAM Hash Map index: " << (double)memori_hash_index / 1024 << " KB" << endl;
+    cout << ">> Estimasi RAM Tree + Hash Map: " << (double)memori_hybrid / 1024 << " KB" << endl;
+    cout << "Kesimpulan: Hash Map dipakai sebagai index tambahan, sehingga sistem hybrid membutuhkan memori lebih besar demi pencarian ID O(1)." << endl;
 }
 
 
@@ -183,6 +260,58 @@ void tampilkanDaftarSubkategoriNonLeaf(const vector<Kategori*>& list_kat, string
 
         tampilkanDaftarSubkategoriNonLeaf(kat->sub_kategori, indent + "    ");
     }
+}
+
+void tampilkanSubkategoriRekursif(Kategori* kat, string indent, int& jumlah_data)
+{
+    if (kat == nullptr)
+    {
+        return;
+    }
+
+    for (Kategori* anak : kat->sub_kategori)
+    {
+        string txt_status = (anak->status == 1) ? "Aktif" : "Nonaktif";
+
+        cout << indent << "|-- [" << anak->id_kategori << "] "
+             << anak->nama
+             << " | Level: " << anak->level
+             << " | " << txt_status
+             << endl;
+
+        jumlah_data++;
+        tampilkanSubkategoriRekursif(anak, indent + "    ", jumlah_data);
+    }
+}
+
+void tampilkanSemuaSubkategoriBerdasarkanKategori(int id_kategori)
+{
+    Kategori* target = cariDenganHash(id_kategori);
+
+    if (target == nullptr)
+    {
+        cout << "[!] ID kategori tidak ditemukan." << endl;
+        return;
+    }
+
+    cout << "\n--- SEMUA SUBKATEGORI / TURUNAN KATEGORI ---" << endl;
+    cout << "Kategori : [" << target->id_kategori << "] "
+         << target->nama << endl;
+    cout << "Level    : " << target->level << endl;
+    cout << "---------------------------------------------" << endl;
+
+    int jumlah_data = 0;
+
+    tampilkanSubkategoriRekursif(target, "", jumlah_data);
+
+    if (jumlah_data == 0)
+    {
+        cout << "[INFO] Kategori ini belum memiliki subkategori." << endl;
+    }
+
+    cout << "---------------------------------------------" << endl;
+    cout << "[INFO] Total subkategori/turunan ditemukan: "
+         << jumlah_data << endl;
 }
 
 void tampilkanDataLeafRekursif(Kategori* kat, int& jumlah_data)
