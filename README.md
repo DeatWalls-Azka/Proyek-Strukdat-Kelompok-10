@@ -1,84 +1,168 @@
-# Sistem Manajemen Kategori & Monitoring Performa (Topik 10)
+# Sistem Manajemen Kategori dan Monitoring Performa
 
-**Proyek Akhir Praktikum Struktur Data - Departemen Ilmu Komputer IPB**
+Proyek akhir Praktikum Struktur Data - Topik 10: Sistem Manajemen Kategori dan Hierarki Data.
 
-Program ini mengimplementasikan struktur data **Hybrid** antara **Linked Tree** (untuk manajemen hierarki) dan **Hash Map** (untuk optimasi pencarian) guna mengelola ribuan data kategori secara efisien.
+Program ini mengelola kategori dan subkategori dalam bentuk hierarki. Sistem menggunakan kombinasi N-ary Tree dan Hash Map untuk menampilkan data bertingkat, mencari kategori, menghapus kategori beserta turunannya, serta menganalisis performa pencarian dan penggunaan memori.
 
----
+Proyek ini bertujuan untuk mensimulasikan sistem manajemen kategori pada skala industri menggunakan dataset dari UCI Online Retail. Dataset tersebut diolah menjadi data kategori hierarkis dengan lebih dari 5.700 data unik. Sistem membandingkan efisiensi waktu eksekusi antara pencarian DFS pada Tree dengan pencarian langsung menggunakan Hash Map.
 
-## 👥 Kelompok 10 - Struktur Data
+## Anggota Kelompok
 
 | Nama | NIM |
-|------|-----|
+|---|---|
 | Azka Julian Putra Wahyudi | M0403241029 |
 | Aaliyah Nofarizki | M0403241011 |
 | Asty Athetha Loethan | M0403241089 |
 | Muhamad Raihan Pratama Putra Setyatmoko | M04032241064 |
 
----
+## Struktur Data
 
-## 📝 Deskripsi Proyek
+| Struktur Data | Fungsi |
+|---|---|
+| N-ary Tree / Linked Tree | Menyimpan relasi parent-child kategori dan subkategori. |
+| Hash Map / `unordered_map` | Mempercepat pencarian kategori berdasarkan ID. |
 
-Proyek ini bertujuan untuk mensimulasikan sistem manajemen kategori pada skala industri menggunakan dataset dari **UCI Online Retail**. Dengan lebih dari **5.700 data unik**, sistem ini membandingkan efisiensi waktu eksekusi antara penelusuran pohon secara rekursif (O(n)) dengan pencarian langsung menggunakan tabel hash (O(1)).
+Perbandingan waktu pencarian dilakukan antara DFS pada Tree dan Hash Map. Perbandingan memori dilakukan antara Tree saja dan Tree + Hash Map karena Hash Map digunakan sebagai indeks tambahan.
 
----
+## Domain Data
 
-## 🚀 Fitur Utama
-
-### **Hybrid Data Structure**
-- Menggabungkan **N-ary Tree** untuk visualisasi hierarki
-- **Unordered Hash Map** untuk akses data instan
-
-### **Manajemen CRUD Lengkap**
-- **Insert**: Menambahkan kategori dan sub-kategori baru
-- **Update**: Memperbarui informasi nama kategori secara dinamis
-- **Delete (Recursive)**: Menghapus kategori beserta seluruh turunannya secara aman
-- **Search**: Pencarian dengan DFS (Tree) dan Hash Map
-
-### **Advanced Monitoring & Analysis**
-- **Benchmarking**: Uji kecepatan pencarian (Tree vs Hash Map) dalam satuan mikrodetik
-- **Memory Monitoring**: Estimasi penggunaan RAM untuk masing-masing struktur data
-- **Data Persistence**: Otomatis menyimpan dan memuat data dari `dataset_kategori.txt`
-- **Sorting**: Pengurutan kategori berdasarkan abjad (A-Z)
-
----
-
-## 📊 Domain Data
-
-Sesuai spesifikasi teknis, setiap entitas data memiliki atribut:
+Setiap kategori memiliki atribut:
 
 | Atribut | Tipe | Keterangan |
-|---------|------|-----------|
-| ID Kategori | `int` | Kunci unik (Primary Key) |
-| Nama Kategori | `string` | Label deskripsi kategori |
-| ID Induk (Parent) | `int` | Relasi untuk membentuk hierarki |
-| Level | `int` | Kedalaman kategori dalam pohon |
-| Status | `int` | Indikator Aktif (1) atau Nonaktif (0) |
+|---|---|---|
+| ID Kategori | `int` | ID unik kategori. |
+| Nama Kategori | `string` | Nama kategori atau produk. |
+| Parent ID | `int` | ID induk kategori. Nilai 0 berarti root. |
+| Level | `int` | Kedalaman kategori dalam tree. |
+| Status | `int` | 1 untuk aktif, 0 untuk nonaktif. |
+| Subkategori | `vector<Kategori*>` | Daftar child dari kategori. |
 
----
+## Fitur Utama
 
-## 💻 Cara Menjalankan
+- Load dan save data dari `dataset_kategori.txt`.
+- Insert kategori baru dengan level otomatis.
+- Validasi ID unik, Parent ID, dan status aktif/nonaktif.
+- Update data kategori:
+  - Ubah nama.
+  - Ubah status.
+  - Pindah parent kategori.
+- Delete kategori beserta seluruh subkategori secara rekursif.
+- Tampilkan seluruh hierarki kategori.
+- Tampilkan 50 data hierarki teratas.
+- Tampilkan semua subkategori/turunan dari kategori tertentu.
+- Tampilkan data paling bawah atau leaf dari kategori tertentu.
+- Search berdasarkan ID menggunakan DFS pada Tree dan Hash Map.
+- Search berdasarkan nama menggunakan DFS.
+- Sorting kategori A-Z secara rekursif.
+- Benchmark waktu pencarian.
+- Monitoring estimasi penggunaan memori.
+- Export hasil benchmark ke `hasil_benchmark.csv`.
 
-### Prasyarat
-Pastikan Anda memiliki compiler C++ (seperti MinGW atau GCC) yang sudah terpasang.
+## File Penting
 
-### Kompilasi Program
-```bash
-g++ main.cpp ManagerKategori.cpp -o ProgramFinal
+| File | Keterangan |
+|---|---|
+| `main.cpp` | Menu utama, benchmark, export CSV, dan input pengguna. |
+| `ManagerKategori.cpp` | Implementasi struktur data dan operasi kategori. |
+| `Kategori.h` | Struct `Kategori` dan deklarasi fungsi. |
+| `dataset_kategori.txt` | Dataset utama yang digunakan program. |
+| `dataset_kategori_backup.txt` | Dataset cadangan. |
+| `hasil_benchmark.csv` | Hasil export benchmark untuk bahan grafik laporan. |
+| `BAHAN_LAPORAN.md` | Panduan tabel, grafik, analisis, dan kesimpulan laporan. |
+| `RINGKASAN_PROYEK.md` | Ringkasan lengkap kondisi akhir proyek. |
+
+## Menu Program
+
+```text
+1. Tampilkan Hierarki Kategori
+2. Tambah Kategori Baru (+ Status)
+3. Update Data Kategori
+4. Hapus Kategori & Sub-Kategori
+5. Urutkan Kategori (A-Z)
+6. Uji Performa Pencarian (Benchmarking)
+7. Monitoring Penggunaan Memori (RAM)
+8. Export Benchmark ke CSV
+0. Simpan & Keluar
 ```
 
-### Jalankan Aplikasi
+## Cara Kompilasi
+
+Pastikan compiler C++ seperti MinGW/GCC sudah tersedia.
+
 ```bash
-./ProgramFinal
+g++ main.cpp ManagerKategori.cpp -o ProgramFinal.exe
 ```
 
----
+## Cara Menjalankan
 
-## 📈 Analisis Performa (Preview)
+PowerShell Windows:
 
-Berdasarkan pengujian pada **5.676 baris data**:
+```powershell
+.\ProgramFinal.exe
+```
 
-- **Search Hash Map**: Konstan (O(1)), rata-rata **jauh lebih cepat** untuk dataset besar
-- **Search Tree (DFS)**: Linear (O(n)), waktu meningkat seiring bertambahnya jumlah data dan kedalaman level
+Terminal bash:
 
-Hasil benchmark menunjukkan Hash Map dapat mencapai **~10-15x lebih cepat** dibanding Tree traversal pada dataset besar.
+```bash
+./ProgramFinal.exe
+```
+
+## Format Dataset
+
+Dataset proyek bersumber dari UCI Online Retail yang sudah diolah menjadi format kategori dan subkategori.
+
+Dataset disimpan dalam format:
+
+```text
+id_kategori;nama;parent_id;level;status
+```
+
+Contoh:
+
+```text
+1;Semua Produk;0;1;1
+10;Home & Garden;1;2;1
+100;Decor;10;3;1
+101;Home Accessories;100;4;1
+```
+
+## Export Benchmark
+
+Untuk membuat bahan tabel dan grafik laporan:
+
+1. Jalankan program.
+2. Pilih menu `8. Export Benchmark ke CSV`.
+3. Buka `hasil_benchmark.csv` di Excel atau Google Sheets.
+4. Buat grafik waktu pencarian dan penggunaan memori.
+
+Kolom utama CSV:
+
+```text
+level
+jumlah_data
+total_pencarian
+waktu_dfs_us
+waktu_hash_us
+rata_dfs_ns
+rata_hash_ns
+rasio_dfs_vs_hash
+total_node
+estimasi_memori_tree_kb
+estimasi_memori_hash_index_kb
+estimasi_memori_tree_hash_kb
+```
+
+## Analisis Singkat
+
+DFS pada Tree cocok untuk menelusuri hierarki, tetapi pencarian ID memiliki kompleksitas O(n). Hash Map memiliki kompleksitas rata-rata O(1), sehingga lebih cepat untuk pencarian berdasarkan ID.
+
+Trade-off utama sistem adalah penggunaan memori. Tree saja membutuhkan memori lebih kecil, sedangkan Tree + Hash Map membutuhkan memori tambahan untuk indeks. Namun, tambahan memori tersebut memberi keuntungan berupa pencarian ID yang jauh lebih cepat.
+
+## Rekomendasi
+
+Struktur data yang direkomendasikan adalah hybrid N-ary Tree + Hash Map:
+
+- N-ary Tree digunakan untuk menyimpan dan menampilkan hierarki kategori.
+- Hash Map digunakan untuk mempercepat pencarian ID dan validasi parent.
+
+Pendekatan ini paling sesuai untuk sistem manajemen kategori dan hierarki data sederhana.
