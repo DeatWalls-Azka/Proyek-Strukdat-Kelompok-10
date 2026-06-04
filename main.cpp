@@ -553,14 +553,32 @@ int main() {
                 break;
             }
 
-            case 4:
+            case 4: {
                 cout << "Masukkan ID yang akan dihapus: "; cin >> id;
                 if(map_kategori.count(id)) {
-                    hapusKategoriRecursive(id);
-                    simpanData();
-                    cout << "[OK] Kategori dan turunannya berhasil dihapus." << endl;
+                    Kategori* target_hapus = map_kategori[id];
+                    string konfirmasi_hapus;
+
+                    cout << "\n[DATA AKAN DIHAPUS]" << endl;
+                    cout << ">> ID Kategori   : " << target_hapus->id_kategori << endl;
+                    cout << ">> Nama          : " << target_hapus->nama << endl;
+                    cout << ">> Parent ID     : " << target_hapus->parent_id << endl;
+                    cout << ">> Level/Depth   : " << target_hapus->level << endl;
+                    cout << ">> Status        : " << ((target_hapus->status == 1) ? "Aktif" : "Nonaktif") << endl;
+                    cout << "\n[PERINGATAN] Kategori ini beserta seluruh subkategorinya akan dihapus." << endl;
+                    cout << "Konfirmasi hapus (ya/no): ";
+                    cin >> konfirmasi_hapus;
+
+                    if (konfirmasi_hapus == "ya") {
+                        hapusKategoriRecursive(id);
+                        simpanData();
+                        cout << "[OK] Kategori dan turunannya berhasil dihapus." << endl;
+                    } else {
+                        cout << "[INFO] Penghapusan dibatalkan." << endl;
+                    }
                 } else cout << "[!] ID tidak ditemukan." << endl;
                 break;
+            }
 
             case 5: {
                 int pilihan_urut;
