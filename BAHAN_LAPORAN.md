@@ -27,6 +27,15 @@ Data kategori pada sistem e-commerce, arsip digital, dan manajemen konten biasan
 | Delete kategori beserta turunan | O(k) | O(k) | Semua turunan harus dihapus dari tree dan hash map |
 | Update parent | O(k) | O(1) untuk akses node | k dipakai untuk validasi turunan dan update level |
 
+Tabel average case dan worst case yang dapat dimasukkan pada bagian teori:
+
+| Operasi | Average Case | Worst Case | Keterangan |
+|---|---:|---:|---|
+| Search DFS pada Tree | O(n) | O(n) | Terburuk saat data berada di node terakhir atau tidak ditemukan |
+| Search Hash Map | O(1) | O(n) | Terburuk saat banyak collision |
+| Delete Subtree | O(k) | O(n) | Jika subtree yang dihapus mencakup hampir semua data |
+| Tampilkan Hierarki | O(n) | O(n) | Semua node harus dikunjungi |
+
 ## Fitur Sistem
 
 - Insert kategori baru dengan level otomatis.
@@ -44,15 +53,21 @@ Data kategori pada sistem e-commerce, arsip digital, dan manajemen konten biasan
 
 ## Skenario Pengujian
 
-Pengujian dilakukan dengan menjalankan pencarian ID pada beberapa level hierarki, yaitu level 2 sampai level 5. Setiap ID pada level tersebut dicari beberapa kali menggunakan dua metode:
+Pengujian dilakukan dengan menjalankan pencarian ID pada beberapa level hierarki, yaitu level 2 sampai level 5. Setiap ID pada level tersebut dicari 1.000 kali menggunakan dua metode:
 
 1. DFS pada tree.
 2. Hash map berdasarkan ID.
 
-Hasil pengujian diekspor ke file `hasil_benchmark.csv` melalui menu:
+Hasil pengujian berdasarkan level diekspor ke file `hasil_benchmark.csv` melalui menu:
 
 ```text
 8. Export Benchmark ke CSV
+```
+
+Hasil pengujian pertumbuhan jumlah data diekspor ke file `hasil_benchmark_pertumbuhan_data.csv` melalui menu:
+
+```text
+9. Export Benchmark Pertumbuhan Data
 ```
 
 Kolom CSV:
@@ -61,6 +76,7 @@ Kolom CSV:
 level
 jumlah_data
 total_pencarian
+estimasi_node_dikunjungi_dfs
 waktu_dfs_us
 waktu_hash_us
 rata_dfs_ns
@@ -72,26 +88,37 @@ estimasi_memori_hash_index_kb
 estimasi_memori_tree_hash_kb
 ```
 
-## Grafik yang Disarankan
+## Tabel dan Grafik Final yang Disarankan
 
-Grafik 1: Perbandingan waktu pencarian DFS vs Hash Map
+Tabel 1: Rata-rata waktu pencarian berdasarkan pertumbuhan jumlah data
+
+- Kolom: `jumlah_data`, `id_target`, `rata_dfs_us`, `rata_hash_us`
+
+Grafik 1: Rata-rata waktu pencarian DFS pada Tree dan Hash Map berdasarkan pertumbuhan jumlah data
+
+- Sumbu X: jumlah_data
+- Sumbu Y: rata-rata waktu pencarian dalam mikrodetik per pencarian
+- Seri data: `rata_dfs_us` dan `rata_hash_us`
+
+Tabel 2: Rata-rata waktu pencarian berdasarkan kedalaman level
+
+- Kolom: `level`, `jumlah_data`, `total_pencarian`, `rata_dfs_us`, `rata_hash_us`
+
+Grafik 2: Rata-rata waktu pencarian DFS pada Tree dan Hash Map berdasarkan level
 
 - Sumbu X: level
-- Sumbu Y: waktu eksekusi dalam mikrodetik
-- Seri data: `waktu_dfs_us` dan `waktu_hash_us`
+- Sumbu Y: rata-rata waktu pencarian dalam mikrodetik per pencarian
+- Seri data: `rata_dfs_us` dan `rata_hash_us`
 
-Grafik 2: Rata-rata waktu pencarian per operasi
+Tabel 3: Penggunaan memori berdasarkan total data 5.694
 
-- Sumbu X: level
-- Sumbu Y: rata-rata waktu dalam nanodetik
-- Seri data: `rata_dfs_ns` dan `rata_hash_ns`
+- Kolom: Total Data, RAM Tree Saja (KB), RAM Tree + Hash Map (KB)
 
-Grafik 3: Estimasi penggunaan memori
+Grafik 3: Perbandingan penggunaan memori Tree Saja dan Tree + Hash Map
 
 - Sumbu X: struktur data
 - Sumbu Y: memori dalam KB
-- Seri data utama: `estimasi_memori_tree_kb` dan `estimasi_memori_tree_hash_kb`
-- `estimasi_memori_hash_index_kb` dapat dijelaskan sebagai memori tambahan untuk indeks hash map
+- Data: Tree Saja dan Tree + Hash Map
 
 ## Tabel dan Grafik yang Dimasukkan ke Laporan
 
@@ -103,7 +130,7 @@ Masukkan ke Bab 7 `Eksperimen & Pengujian`:
 
 | Item | Letak | Tujuan |
 |---|---|---|
-| Skenario pengujian manual berdasarkan posisi data | Bab 7 | Menjelaskan target data paling atas, tengah, dan paling bawah |
+| Skenario benchmark pertumbuhan jumlah data | Bab 7 | Menjelaskan variasi ukuran data yang diuji |
 | Skenario benchmark otomatis berdasarkan level | Bab 7 | Menjelaskan level 2 sampai level 5 dan jumlah pengulangan |
 | Metode pengukuran waktu dan memori | Bab 7 | Menjelaskan penggunaan `chrono`, jumlah iterasi, dan estimasi memori |
 | Replikasi eksperimen | Bab 7 | Menjelaskan bahwa pencarian dilakukan berulang agar hasil lebih stabil |
@@ -112,12 +139,12 @@ Masukkan ke Bab 8 `Hasil & Analisis`:
 
 | Item | Letak | Keterangan |
 |---|---|---|
-| Tabel 1. Hasil pengujian manual berdasarkan posisi data | Bab 8 | Tabel hasil waktu DFS pada Tree vs Hash Map untuk posisi atas, tengah, bawah |
-| Grafik 1. Grafik dari Tabel 1 | Bab 8 | Visualisasi pengaruh posisi data terhadap waktu pencarian |
-| Tabel 2. Hasil benchmark otomatis dari CSV berdasarkan level | Bab 8 | Tabel hasil ekspor `hasil_benchmark.csv` |
-| Grafik 2. Grafik waktu DFS vs Hash Map dari CSV | Bab 8 | Visualisasi total waktu pencarian per level |
-| Grafik 3. Grafik rata-rata waktu dari CSV | Bab 8 | Visualisasi rata-rata waktu pencarian per operasi |
-| Grafik 4. Grafik memori dari CSV | Bab 8 | Visualisasi penggunaan memori Tree saja vs Tree + Hash Map |
+| Tabel 1. Hasil benchmark pertumbuhan jumlah data | Bab 8 | Tabel rata-rata waktu DFS pada Tree vs Hash Map untuk beberapa ukuran data |
+| Grafik 1. Grafik rata-rata waktu pencarian berdasarkan pertumbuhan jumlah data | Bab 8 | Visualisasi dampak pertumbuhan jumlah data terhadap rata-rata waktu pencarian |
+| Tabel 2. Hasil benchmark otomatis dari CSV berdasarkan level | Bab 8 | Tabel rata-rata waktu pencarian berdasarkan level |
+| Grafik 2. Grafik rata-rata waktu DFS vs Hash Map berdasarkan level | Bab 8 | Visualisasi rata-rata waktu pencarian per level |
+| Tabel 3. Penggunaan memori berdasarkan total data 5.694 | Bab 8 | Tabel ringkas penggunaan memori Tree saja dan Tree + Hash Map |
+| Grafik 3. Grafik memori Tree saja vs Tree + Hash Map | Bab 8 | Visualisasi penggunaan memori pada total data akhir |
 | Analisis insert/search/delete | Bab 8 | Jelaskan hasil operasi sistem dan kompleksitasnya |
 | Analisis penggunaan memori | Bab 8 | Jelaskan tambahan memori dari Hash Map index |
 | Diskusi trade-off | Bab 8 | Jelaskan pertukaran antara kecepatan pencarian dan penggunaan memori |
@@ -135,83 +162,91 @@ Masukkan ke Bab 12 `Lampiran` jika diperlukan:
 | Item | Letak | Keterangan |
 |---|---|---|
 | File `hasil_benchmark.csv` | Lampiran | Data mentah hasil benchmark otomatis |
+| File `hasil_benchmark_pertumbuhan_data.csv` | Lampiran | Data mentah benchmark pertumbuhan jumlah data |
 | Potongan kode benchmark | Lampiran | Fungsi export benchmark atau fungsi pencarian |
 | Screenshot demo aplikasi | Lampiran | Bukti fitur berjalan |
 
-### Tabel 1: Perbandingan Waktu Pencarian Berdasarkan Posisi Data
+### Tabel 1: Rata-rata Waktu Pencarian Berdasarkan Pertumbuhan Jumlah Data
 
-Sumber data: tabel manual yang sudah dibuat di spreadsheet.
+Sumber data: `hasil_benchmark_pertumbuhan_data.csv` dari menu 9.
 
 Judul tabel:
 
 ```text
-Tabel 1. Perbandingan Waktu Eksekusi Pencarian Berdasarkan Posisi Data dalam Hierarki
+Tabel 1. Rata-rata Waktu Pencarian Berdasarkan Pertumbuhan Jumlah Data
 ```
 
 Nama kolom:
 
 ```text
-Skenario
-ID Target
-Waktu DFS pada Tree (mks)
-Waktu Hash Map (mks)
-RAM Tree Saja (KB)
-RAM Tree + Hash Map (KB)
+jumlah_data
+id_target
+rata_dfs_us
+rata_hash_us
 ```
 
-Isi skenario:
+Kolom `rata_dfs_us` dan `rata_hash_us` dapat dihitung dari CSV:
 
 ```text
-Paling atas
-Tengah
-Paling bawah
+rata_dfs_us = waktu_dfs_us / pengulangan
+rata_hash_us = waktu_hash_us / pengulangan
 ```
 
-Catatan penyesuaian:
+Kolom lain seperti `pengulangan`, `total_pencarian`, `estimasi_node_dikunjungi_dfs`, `waktu_dfs_us`, `waktu_hash_us`, `rata_dfs_ns`, `rata_hash_ns`, dan `rasio_dfs_vs_hash` boleh disimpan di lampiran jika laporan utama perlu dibuat lebih ringkas.
 
-- Jika data RAM lama masih memakai kolom `RAM Tree (KB)` dan `RAM Hash (KB)`, sebaiknya ubah labelnya.
-- Untuk laporan final, gunakan istilah `RAM Tree Saja (KB)` dan `RAM Tree + Hash Map (KB)`.
-- Jika nilai `RAM Hash (KB)` hanya menunjukkan memori indeks hash map, jelaskan sebagai `RAM Hash Map Index (KB)`, bukan sebagai pengganti tree.
+Ukuran data yang digunakan menyesuaikan jumlah data tersedia, misalnya:
+
+```text
+1.000
+2.000
+3.000
+4.000
+5.000
+total data
+```
+
+Benchmark pertumbuhan jumlah data menggunakan 10.000 pengulangan pencarian target untuk setiap ukuran data.
+Karena Hash Map sangat cepat, waktu Hash Map diukur dengan pengulangan internal yang lebih besar lalu dinormalisasi kembali agar setara dengan 10.000 pencarian.
 
 Kesimpulan Tabel 1:
 
 ```text
-Hasil pengujian berdasarkan posisi data menunjukkan bahwa waktu pencarian DFS pada Tree dipengaruhi oleh letak data dalam hierarki. Data yang berada semakin jauh dari root membutuhkan waktu pencarian lebih besar karena DFS harus menelusuri lebih banyak node. Sebaliknya, pencarian menggunakan Hash Map relatif stabil karena akses dilakukan langsung berdasarkan ID.
+Hasil pengujian berdasarkan pertumbuhan jumlah data menunjukkan bahwa rata-rata waktu pencarian DFS pada Tree meningkat ketika jumlah data yang diuji semakin besar. Hal ini terjadi karena DFS harus menelusuri node satu per satu. Sebaliknya, rata-rata waktu pencarian Hash Map relatif lebih stabil karena pencarian dilakukan langsung berdasarkan ID.
 ```
 
-### Grafik 1: Perbandingan Waktu Pencarian Berdasarkan Posisi Data
+### Grafik 1: Rata-rata Waktu Pencarian Berdasarkan Pertumbuhan Jumlah Data
 
-Sumber data: Tabel 1 dari spreadsheet manual.
+Sumber data: `hasil_benchmark_pertumbuhan_data.csv`.
 
 Judul grafik:
 
 ```text
-Grafik 1. Perbandingan Waktu Pencarian DFS pada Tree dan Hash Map Berdasarkan Posisi Data
+Grafik 1. Rata-rata Waktu Pencarian DFS pada Tree dan Hash Map Berdasarkan Pertumbuhan Jumlah Data
 ```
 
 Sumbu dan seri data:
 
 ```text
-Sumbu X: Skenario / ID Target
-Sumbu Y: Waktu Eksekusi (mks)
-Seri 1: Waktu DFS pada Tree (mks)
-Seri 2: Waktu Hash Map (mks)
+Sumbu X: jumlah_data
+Sumbu Y: Rata-rata Waktu Pencarian (mks/pencarian)
+Seri 1: rata_dfs_us
+Seri 2: rata_hash_us
 ```
 
 Kesimpulan Grafik 1:
 
 ```text
-Grafik menunjukkan bahwa waktu pencarian DFS pada Tree meningkat ketika target berada pada posisi tengah dan paling bawah. Hash Map memiliki waktu pencarian yang jauh lebih kecil dan lebih stabil karena tidak bergantung pada posisi node dalam hierarki.
+Grafik menunjukkan bahwa rata-rata waktu pencarian DFS pada Tree meningkat seiring bertambahnya jumlah data. Hash Map memiliki rata-rata waktu pencarian yang lebih kecil dan relatif stabil karena akses data dilakukan melalui indeks ID.
 ```
 
-### Tabel 2: Perbandingan Waktu Pencarian Berdasarkan Kedalaman Level
+### Tabel 2: Rata-rata Waktu Pencarian Berdasarkan Kedalaman Level
 
 Sumber data: tabel manual yang sudah dibuat atau hasil `hasil_benchmark.csv`.
 
 Judul tabel:
 
 ```text
-Tabel 2. Perbandingan Waktu Eksekusi Pencarian Berdasarkan Kedalaman Level
+Tabel 2. Rata-rata Waktu Pencarian Berdasarkan Kedalaman Level
 ```
 
 Nama kolom versi manual:
@@ -219,8 +254,8 @@ Nama kolom versi manual:
 ```text
 Skenario Kedalaman
 ID Target
-Waktu DFS pada Tree (mks)
-Waktu Hash Map (mks)
+Rata-rata DFS pada Tree (mks/pencarian)
+Rata-rata Hash Map (mks/pencarian)
 ```
 
 Nama kolom jika memakai CSV:
@@ -229,84 +264,87 @@ Nama kolom jika memakai CSV:
 level
 jumlah_data
 total_pencarian
-waktu_dfs_us
-waktu_hash_us
-rata_dfs_ns
-rata_hash_ns
-rasio_dfs_vs_hash
+rata_dfs_us
+rata_hash_us
 ```
+
+Kolom `rata_dfs_us` dan `rata_hash_us` dapat dihitung dari CSV:
+
+```text
+rata_dfs_us = waktu_dfs_us / total_pencarian
+rata_hash_us = waktu_hash_us / total_pencarian
+```
+
+Kolom `waktu_dfs_us`, `waktu_hash_us`, `rata_dfs_ns`, `rata_hash_ns`, dan `rasio_dfs_vs_hash` boleh disimpan di lampiran jika tidak digunakan di tabel utama.
 
 Catatan satuan:
 
 ```text
 CSV memakai satuan mikrodetik pada kolom waktu_dfs_us dan waktu_hash_us.
-Dalam laporan, boleh ditulis sebagai mks/mikrodetik agar konsisten dengan tabel manual.
+Untuk tabel utama, gunakan rata-rata waktu dalam mks/pencarian agar perbandingan antarlevel lebih adil.
+Benchmark otomatis memakai 1.000 pengulangan untuk setiap data pada level yang diuji.
+Total pencarian berbeda pada tiap level karena jumlah data pada tiap level berbeda.
 ```
 
 Kesimpulan Tabel 2:
 
 ```text
-Pengujian berdasarkan level menunjukkan bahwa DFS pada Tree membutuhkan waktu lebih besar dibanding Hash Map pada setiap level. Hal ini sesuai dengan kompleksitas DFS sebesar O(n), sedangkan Hash Map memiliki kompleksitas rata-rata O(1). Hasil ini memperkuat bahwa Hash Map lebih efisien untuk pencarian berdasarkan ID.
+Pengujian berdasarkan level menunjukkan bahwa rata-rata waktu pencarian DFS pada Tree lebih besar dibanding Hash Map pada setiap level. Hal ini sesuai dengan kompleksitas DFS sebesar O(n), sedangkan Hash Map memiliki kompleksitas rata-rata O(1). Hasil ini memperkuat bahwa Hash Map lebih efisien untuk pencarian berdasarkan ID.
 ```
 
-### Grafik 2: Perbandingan Waktu Pencarian Berdasarkan Level
+### Grafik 2: Rata-rata Waktu Pencarian Berdasarkan Level
 
 Sumber data: `hasil_benchmark.csv`.
 
 Judul grafik:
 
 ```text
-Grafik 2. Perbandingan Waktu Pencarian DFS pada Tree dan Hash Map Berdasarkan Level
+Grafik 2. Rata-rata Waktu Pencarian DFS pada Tree dan Hash Map Berdasarkan Level
 ```
 
 Sumbu dan seri data:
 
 ```text
 Sumbu X: level
-Sumbu Y: Waktu Eksekusi (mikrodetik)
-Seri 1: waktu_dfs_us
-Seri 2: waktu_hash_us
+Sumbu Y: Rata-rata Waktu Pencarian (mks/pencarian)
+Seri 1: rata_dfs_us
+Seri 2: rata_hash_us
 ```
 
 Kesimpulan Grafik 2:
 
 ```text
-Grafik memperlihatkan bahwa waktu pencarian menggunakan DFS pada Tree lebih tinggi dibandingkan Hash Map pada berbagai level kategori. Hash Map tetap lebih cepat karena pencarian dilakukan melalui indeks ID, sedangkan DFS perlu melakukan traversal pada struktur tree.
+Grafik memperlihatkan bahwa rata-rata waktu pencarian menggunakan DFS pada Tree lebih tinggi dibandingkan Hash Map pada berbagai level kategori. Hash Map tetap lebih cepat karena pencarian dilakukan melalui indeks ID, sedangkan DFS perlu melakukan traversal pada struktur tree.
 ```
 
-### Grafik 3: Rata-rata Waktu Pencarian per Operasi
+### Tabel 3: Penggunaan Memori Berdasarkan Total Data 5.694
 
-Sumber data: `hasil_benchmark.csv`.
+Judul tabel:
+
+```text
+Tabel 3. Penggunaan Memori Berdasarkan Total Data 5.694
+```
+
+Nama kolom:
+
+```text
+Total Data
+RAM Tree Saja (KB)
+RAM Tree + Hash Map (KB)
+```
+
+Contoh isi tabel:
+
+```text
+5.694 | 444.766 | 556.055
+```
+
+### Grafik 3: Perbandingan Penggunaan Memori Tree Saja dan Tree + Hash Map
 
 Judul grafik:
 
 ```text
-Grafik 3. Rata-rata Waktu Pencarian per Operasi DFS pada Tree dan Hash Map
-```
-
-Sumbu dan seri data:
-
-```text
-Sumbu X: level
-Sumbu Y: Rata-rata Waktu (nanodetik)
-Seri 1: rata_dfs_ns
-Seri 2: rata_hash_ns
-```
-
-Kesimpulan Grafik 3:
-
-```text
-Rata-rata waktu pencarian per operasi menunjukkan perbedaan performa yang lebih adil karena memperhitungkan jumlah pencarian. DFS pada Tree tetap memiliki rata-rata waktu lebih besar dibanding Hash Map, sehingga Hash Map lebih sesuai untuk operasi pencarian ID yang sering dilakukan.
-```
-
-### Grafik 4: Perbandingan Penggunaan Memori
-
-Sumber data: `hasil_benchmark.csv` atau menu monitoring memori.
-
-Judul grafik:
-
-```text
-Grafik 4. Perbandingan Penggunaan Memori Tree Saja dan Tree + Hash Map
+Grafik 3. Perbandingan Penggunaan Memori Tree Saja dan Tree + Hash Map
 ```
 
 Sumbu dan seri data:
@@ -314,22 +352,14 @@ Sumbu dan seri data:
 ```text
 Sumbu X: Struktur Data
 Sumbu Y: Memori (KB)
-Seri 1: estimasi_memori_tree_kb
-Seri 2: estimasi_memori_tree_hash_kb
+Data 1: Tree Saja
+Data 2: Tree + Hash Map
 ```
 
-Kolom pendukung:
+Kalimat analisis:
 
 ```text
-estimasi_memori_hash_index_kb
-```
-
-Kolom `estimasi_memori_hash_index_kb` digunakan untuk menjelaskan tambahan memori dari indeks hash map.
-
-Kesimpulan Grafik 4:
-
-```text
-Grafik memori menunjukkan bahwa penggunaan struktur hybrid Tree + Hash Map membutuhkan memori lebih besar dibanding Tree saja. Tambahan memori tersebut berasal dari indeks Hash Map. Namun, tambahan memori ini sebanding dengan peningkatan kecepatan pencarian ID yang diperoleh.
+Berdasarkan grafik, penggunaan memori pada struktur Tree + Hash Map lebih besar dibanding Tree saja. Hal ini terjadi karena Hash Map digunakan sebagai indeks tambahan untuk mempercepat pencarian ID kategori. Meskipun membutuhkan tambahan memori, struktur hybrid memberikan keuntungan berupa pencarian yang lebih cepat.
 ```
 
 ## Kesimpulan Akhir untuk Bagian Hasil dan Analisis
@@ -337,7 +367,7 @@ Grafik memori menunjukkan bahwa penggunaan struktur hybrid Tree + Hash Map membu
 Kesimpulan yang dapat dimasukkan:
 
 ```text
-Berdasarkan hasil pengujian, pencarian menggunakan Hash Map lebih cepat dibandingkan pencarian DFS pada Tree. Pada pencarian DFS, waktu eksekusi dipengaruhi oleh posisi dan kedalaman data karena proses pencarian dilakukan dengan menelusuri node satu per satu. Sebaliknya, Hash Map dapat mengakses data secara langsung berdasarkan ID sehingga waktu pencarian relatif lebih stabil.
+Berdasarkan hasil pengujian, pencarian menggunakan Hash Map lebih cepat dibandingkan pencarian DFS pada Tree. Pada pencarian DFS, waktu eksekusi dipengaruhi oleh jumlah data dan kedalaman data karena proses pencarian dilakukan dengan menelusuri node satu per satu. Sebaliknya, Hash Map dapat mengakses data secara langsung berdasarkan ID sehingga waktu pencarian relatif lebih stabil.
 
 Dari sisi memori, struktur hybrid Tree + Hash Map membutuhkan memori lebih besar dibanding Tree saja karena Hash Map digunakan sebagai indeks tambahan. Namun, tambahan memori tersebut memberikan keuntungan berupa pencarian ID yang jauh lebih cepat. Oleh karena itu, kombinasi N-ary Tree dan Hash Map menjadi struktur data yang paling sesuai untuk sistem manajemen kategori dan hierarki data ini.
 ```

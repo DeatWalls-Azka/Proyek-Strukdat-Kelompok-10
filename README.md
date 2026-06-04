@@ -57,6 +57,7 @@ Setiap kategori memiliki atribut:
 - Benchmark waktu pencarian.
 - Monitoring estimasi penggunaan memori.
 - Export hasil benchmark ke `hasil_benchmark.csv`.
+- Export benchmark pertumbuhan jumlah data ke `hasil_benchmark_pertumbuhan_data.csv`.
 
 ## File Penting
 
@@ -68,6 +69,7 @@ Setiap kategori memiliki atribut:
 | `dataset_kategori.txt` | Dataset utama yang digunakan program. |
 | `dataset_kategori_backup.txt` | Dataset cadangan. |
 | `hasil_benchmark.csv` | Hasil export benchmark untuk bahan grafik laporan. |
+| `hasil_benchmark_pertumbuhan_data.csv` | Hasil benchmark dampak pertumbuhan jumlah data. |
 | `BAHAN_LAPORAN.md` | Panduan tabel, grafik, analisis, dan kesimpulan laporan. |
 | `RINGKASAN_PROYEK.md` | Ringkasan lengkap kondisi akhir proyek. |
 
@@ -82,6 +84,7 @@ Setiap kategori memiliki atribut:
 6. Uji Performa Pencarian (Benchmarking)
 7. Monitoring Penggunaan Memori (RAM)
 8. Export Benchmark ke CSV
+9. Export Benchmark Pertumbuhan Data
 0. Simpan & Keluar
 ```
 
@@ -128,12 +131,14 @@ Contoh:
 
 ## Export Benchmark
 
-Untuk membuat bahan tabel dan grafik laporan:
+Untuk membuat bahan tabel dan grafik berdasarkan level:
 
 1. Jalankan program.
 2. Pilih menu `8. Export Benchmark ke CSV`.
 3. Buka `hasil_benchmark.csv` di Excel atau Google Sheets.
 4. Buat grafik waktu pencarian dan penggunaan memori.
+
+Benchmark CSV menggunakan 1.000 pengulangan untuk setiap data pada level yang diuji. Total pencarian berbeda pada tiap level karena jumlah data pada setiap level berbeda.
 
 Kolom utama CSV:
 
@@ -141,12 +146,39 @@ Kolom utama CSV:
 level
 jumlah_data
 total_pencarian
+estimasi_node_dikunjungi_dfs
 waktu_dfs_us
 waktu_hash_us
 rata_dfs_ns
 rata_hash_ns
 rasio_dfs_vs_hash
 total_node
+estimasi_memori_tree_kb
+estimasi_memori_hash_index_kb
+estimasi_memori_tree_hash_kb
+```
+
+Untuk membuat bahan tabel dan grafik pertumbuhan jumlah data:
+
+1. Jalankan program.
+2. Pilih menu `9. Export Benchmark Pertumbuhan Data`.
+3. Buka `hasil_benchmark_pertumbuhan_data.csv` di Excel atau Google Sheets.
+
+Benchmark pertumbuhan data menggunakan 10.000 pengulangan untuk target pada setiap ukuran data agar perbedaan waktu DFS pada Tree dan Hash Map terlihat lebih jelas.
+Karena Hash Map sangat cepat, waktu Hash Map diukur dengan pengulangan internal yang lebih besar lalu dinormalisasi kembali agar setara dengan 10.000 pencarian.
+
+Kolom utama CSV pertumbuhan data:
+
+```text
+jumlah_data
+id_target
+pengulangan
+total_pencarian
+waktu_dfs_us
+waktu_hash_us
+rata_dfs_ns
+rata_hash_ns
+rasio_dfs_vs_hash
 estimasi_memori_tree_kb
 estimasi_memori_hash_index_kb
 estimasi_memori_tree_hash_kb

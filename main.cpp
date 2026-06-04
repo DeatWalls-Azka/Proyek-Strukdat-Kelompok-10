@@ -58,7 +58,7 @@ void benchmarkPencarianPerLevel(int level_target) {
         return;
     }
 
-    int pengulangan = 10;
+    int pengulangan = 1000;
     long long total_pencarian = (long long) daftar_id.size() * pengulangan;
 
     int jumlah_ketemu_dfs = 0;
@@ -130,6 +130,170 @@ void benchmarkLevel2Sampai5() {
     benchmarkPencarianPerLevel(5);
 }
 
+void kumpulkanSemuaKategori(
+    const vector<Kategori*>& list_kat,
+    vector<Kategori*>& daftar_kategori
+) {
+    for (Kategori* kat : list_kat) {
+        daftar_kategori.push_back(kat);
+        kumpulkanSemuaKategori(kat->sub_kategori, daftar_kategori);
+    }
+}
+
+Kategori* cariKategoriDFSBatas(
+    const vector<Kategori*>& list_kat,
+    int id_target,
+    int& jumlah_dikunjungi,
+    int batas_data
+) {
+    for (Kategori* kat : list_kat) {
+        if (jumlah_dikunjungi >= batas_data) return nullptr;
+
+        jumlah_dikunjungi++;
+
+        if (kat->id_kategori == id_target) return kat;
+
+        Kategori* hasil = cariKategoriDFSBatas(
+            kat->sub_kategori,
+            id_target,
+            jumlah_dikunjungi,
+            batas_data
+        );
+
+        if (hasil) return hasil;
+    }
+
+    return nullptr;
+}
+
+void exportBenchmarkPertumbuhanDataKeCSV() {
+    vector<Kategori*> semua_kategori;
+    kumpulkanSemuaKategori(root_kategori, semua_kategori);
+
+    if (semua_kategori.empty()) {
+        cout << "[!] Dataset kosong. Benchmark pertumbuhan data tidak dapat dijalankan." << endl;
+        return;
+    }
+
+    ofstream file("hasil_benchmark_pertumbuhan_data.csv");
+
+    if (!file.is_open()) {
+        cout << "[!] Gagal membuat file hasil_benchmark_pertumbuhan_data.csv" << endl;
+        return;
+    }
+
+    vector<int> daftar_ukuran = {1000, 2000, 3000, 4000, 5000};
+    int total_data = (int) semua_kategori.size();
+
+    if (total_data < 1000) {
+        daftar_ukuran.clear();
+    }
+
+    if (daftar_ukuran.empty() || daftar_ukuran.back() != total_data) {
+        daftar_ukuran.push_back(total_data);
+    }
+
+    int pengulangan = 10000;
+
+    file << "jumlah_data,id_target,pengulangan,total_pencarian,"
+         << "estimasi_node_dikunjungi_dfs,"
+         << "waktu_dfs_us,waktu_hash_us,rata_dfs_ns,rata_hash_ns,"
+         << "rasio_dfs_vs_hash,estimasi_memori_tree_kb,"
+         << "estimasi_memori_hash_index_kb,estimasi_memori_tree_hash_kb\n";
+
+    cout << "\n=== EXPORT BENCHMARK PERTUMBUHAN DATA ===" << endl;
+
+    for (int ukuran : daftar_ukuran) {
+        if (ukuran > total_data) continue;
+
+        int id_target = semua_kategori[ukuran - 1]->id_kategori;
+        long long total_pencarian = pengulangan;
+        long long estimasi_node_dikunjungi_dfs = (long long) ukuran * pengulangan;
+        int jumlah_ketemu_dfs = 0;
+        int jumlah_ketemu_hash = 0;
+        int faktor_pengukuran_hash = 100;
+        int pengulangan_hash = pengulangan * faktor_pengukuran_hash;
+
+        unordered_map<int, Kategori*> map_sementara;
+        map_sementara.reserve(ukuran);
+
+        for (int i = 0; i < ukuran; i++) {
+            map_sementara[semua_kategori[i]->id_kategori] = semua_kategori[i];
+        }
+
+        auto mulai_dfs = chrono::high_resolution_clock::now();
+
+        for (int ulang = 0; ulang < pengulangan; ulang++) {
+            int jumlah_dikunjungi = 0;
+            if (cariKategoriDFSBatas(root_kategori, id_target, jumlah_dikunjungi, ukuran) != nullptr) {
+                jumlah_ketemu_dfs++;
+            }
+        }
+
+        auto selesai_dfs = chrono::high_resolution_clock::now();
+
+        auto mulai_hash = chrono::high_resolution_clock::now();
+
+        for (int ulang = 0; ulang < pengulangan_hash; ulang++) {
+            if (map_sementara.find(id_target) != map_sementara.end()) {
+                jumlah_ketemu_hash++;
+            }
+        }
+
+        auto selesai_hash = chrono::high_resolution_clock::now();
+
+        auto durasi_dfs_ns = chrono::duration_cast<chrono::nanoseconds>(
+            selesai_dfs - mulai_dfs
+        ).count();
+
+        auto durasi_hash_ns_terukur = chrono::duration_cast<chrono::nanoseconds>(
+            selesai_hash - mulai_hash
+        ).count();
+        double durasi_hash_ns = (double) durasi_hash_ns_terukur / faktor_pengukuran_hash;
+
+        double waktu_dfs_us = durasi_dfs_ns / 1000.0;
+        double waktu_hash_us = durasi_hash_ns / 1000.0;
+        double rata_dfs_ns = (double) durasi_dfs_ns / pengulangan;
+        double rata_hash_ns = durasi_hash_ns / pengulangan;
+        double rasio = (durasi_hash_ns > 0) ? (double) durasi_dfs_ns / durasi_hash_ns : 0;
+        double memori_tree_kb = (double)(ukuran * sizeof(Kategori)) / 1024;
+        double memori_hash_index_kb = (double)(ukuran * (sizeof(int) + sizeof(Kategori*) + 8)) / 1024;
+        double memori_hybrid_kb = memori_tree_kb + memori_hash_index_kb;
+
+        if (jumlah_ketemu_hash == 0) {
+            cout << "[!] Target tidak ditemukan pada Hash Map sementara." << endl;
+        }
+
+        file << ukuran << ","
+             << id_target << ","
+             << pengulangan << ","
+             << total_pencarian << ","
+             << estimasi_node_dikunjungi_dfs << ","
+             << fixed << setprecision(3)
+             << waktu_dfs_us << ","
+             << waktu_hash_us << ","
+             << rata_dfs_ns << ","
+             << rata_hash_ns << ","
+             << rasio << ","
+             << memori_tree_kb << ","
+             << memori_hash_index_kb << ","
+             << memori_hybrid_kb << "\n";
+
+        cout << fixed << setprecision(3)
+             << "Data " << ukuran
+             << " | DFS: " << waktu_dfs_us
+             << " us | Hash: " << waktu_hash_us
+             << " us | Ketemu: " << jumlah_ketemu_dfs
+             << " | Hash dinormalisasi"
+             << endl;
+    }
+
+    file.close();
+
+    cout << "\n[OK] Benchmark pertumbuhan data berhasil diekspor ke hasil_benchmark_pertumbuhan_data.csv" << endl;
+    cout << "[INFO] Gunakan CSV ini untuk tabel/grafik dampak pertumbuhan jumlah data." << endl;
+}
+
 void exportBenchmarkKeCSV() {
     ofstream file("hasil_benchmark.csv");
 
@@ -159,7 +323,7 @@ void exportBenchmarkKeCSV() {
             continue;
         }
 
-        int pengulangan = 10;
+        int pengulangan = 1000;
         long long total_pencarian = (long long)daftar_id.size() * pengulangan;
 
         auto mulai_dfs = chrono::high_resolution_clock::now();
@@ -236,6 +400,7 @@ int main() {
         cout << "\n6. Uji Performa Pencarian (Benchmarking)";
         cout << "\n7. Monitoring Penggunaan Memori (RAM)";
         cout << "\n8. Export Benchmark ke CSV";
+        cout << "\n9. Export Benchmark Pertumbuhan Data";
         cout << "\n0. Simpan & Keluar";
         cout << "\n--------------------------------------------";
         cout << "\nPilih Menu: "; cin >> pilihan;
@@ -454,6 +619,10 @@ int main() {
 
             case 8:
                 exportBenchmarkKeCSV();
+                break;
+
+            case 9:
+                exportBenchmarkPertumbuhanDataKeCSV();
                 break;
 
             case 0:

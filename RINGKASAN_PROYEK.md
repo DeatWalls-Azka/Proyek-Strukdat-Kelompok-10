@@ -34,6 +34,7 @@ Perbandingan performa pencarian dilakukan antara DFS pada Tree dan pencarian lan
 | `dataset_kategori.txt` | Dataset utama yang dibaca dan disimpan program. |
 | `dataset_kategori_backup.txt` | Cadangan dataset. |
 | `hasil_benchmark.csv` | Hasil export benchmark otomatis untuk bahan tabel dan grafik laporan. |
+| `hasil_benchmark_pertumbuhan_data.csv` | Hasil benchmark dampak pertumbuhan jumlah data. |
 | `BAHAN_LAPORAN.md` | Panduan isi laporan akhir, tabel, grafik, kesimpulan, dan penempatan bab. |
 | `README.md` | Dokumentasi penggunaan program. |
 | `ProgramFinal.exe` | File executable hasil kompilasi. |
@@ -183,6 +184,13 @@ Estimasi RAM Tree + Hash Map
 
 Kesimpulan memori: Hash Map membutuhkan memori tambahan, tetapi mempercepat pencarian ID.
 
+Untuk laporan, tabel memori berdasarkan total data akhir dapat ditulis satu baris saja:
+
+```text
+Total Data | RAM Tree Saja (KB) | RAM Tree + Hash Map (KB)
+5.694      | 444.766            | 556.055
+```
+
 ### 10. Export Benchmark ke CSV
 
 Menu:
@@ -197,12 +205,15 @@ Output:
 hasil_benchmark.csv
 ```
 
+Benchmark CSV menggunakan 1.000 pengulangan untuk setiap data pada level yang diuji. Total pencarian berbeda pada tiap level karena jumlah data pada setiap level berbeda.
+
 Kolom CSV:
 
 ```text
 level
 jumlah_data
 total_pencarian
+estimasi_node_dikunjungi_dfs
 waktu_dfs_us
 waktu_hash_us
 rata_dfs_ns
@@ -216,6 +227,42 @@ estimasi_memori_tree_hash_kb
 
 CSV ini digunakan untuk membuat tabel dan grafik pada laporan.
 
+### 11. Export Benchmark Pertumbuhan Data
+
+Menu:
+
+```text
+9. Export Benchmark Pertumbuhan Data
+```
+
+Output:
+
+```text
+hasil_benchmark_pertumbuhan_data.csv
+```
+
+Benchmark ini menguji dampak pertumbuhan jumlah data terhadap waktu pencarian. Ukuran data diuji secara bertahap, misalnya 1.000, 2.000, 3.000, 4.000, 5.000, dan total data yang tersedia.
+
+Setiap ukuran data diuji dengan 10.000 pengulangan pencarian target agar hasil waktu eksekusi lebih terlihat pada grafik.
+Karena Hash Map sangat cepat, waktu Hash Map diukur dengan pengulangan internal yang lebih besar lalu dinormalisasi kembali agar setara dengan 10.000 pencarian.
+
+Kolom CSV:
+
+```text
+jumlah_data
+id_target
+pengulangan
+total_pencarian
+waktu_dfs_us
+waktu_hash_us
+rata_dfs_ns
+rata_hash_ns
+rasio_dfs_vs_hash
+estimasi_memori_tree_kb
+estimasi_memori_hash_index_kb
+estimasi_memori_tree_hash_kb
+```
+
 ## Menu Program Final
 
 ```text
@@ -227,6 +274,7 @@ CSV ini digunakan untuk membuat tabel dan grafik pada laporan.
 6. Uji Performa Pencarian (Benchmarking)
 7. Monitoring Penggunaan Memori (RAM)
 8. Export Benchmark ke CSV
+9. Export Benchmark Pertumbuhan Data
 0. Simpan & Keluar
 ```
 
@@ -245,12 +293,12 @@ Bagian laporan yang sudah disiapkan di `BAHAN_LAPORAN.md`:
 Tabel/grafik yang disarankan:
 
 ```text
-Tabel 1: Hasil pengujian manual berdasarkan posisi data
-Grafik 1: Grafik dari Tabel 1
-Tabel 2: Hasil benchmark otomatis dari CSV berdasarkan level
-Grafik 2: Grafik waktu DFS vs Hash Map dari CSV
-Grafik 3: Grafik rata-rata waktu dari CSV
-Grafik 4: Grafik memori dari CSV
+Tabel 1: Perbandingan waktu eksekusi pencarian berdasarkan pertumbuhan jumlah data
+Grafik 1: Perbandingan waktu pencarian DFS pada Tree dan Hash Map berdasarkan pertumbuhan jumlah data
+Tabel 2: Perbandingan waktu eksekusi pencarian berdasarkan kedalaman level
+Grafik 2: Perbandingan waktu pencarian DFS pada Tree dan Hash Map berdasarkan level
+Tabel 3: Penggunaan memori berdasarkan total data 5.694
+Grafik 3: Perbandingan penggunaan memori Tree saja dan Tree + Hash Map
 ```
 
 ## Cara Kompilasi
