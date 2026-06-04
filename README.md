@@ -4,7 +4,7 @@ Proyek akhir Praktikum Struktur Data - Topik 10: Sistem Manajemen Kategori dan H
 
 Program ini mengelola kategori dan subkategori dalam bentuk hierarki. Sistem menggunakan kombinasi N-ary Tree dan Hash Map untuk menampilkan data bertingkat, mencari kategori, menghapus kategori beserta turunannya, serta menganalisis performa pencarian dan penggunaan memori.
 
-Proyek ini bertujuan untuk mensimulasikan sistem manajemen kategori pada skala industri menggunakan dataset dari UCI Online Retail. Dataset tersebut diolah menjadi data kategori hierarkis dengan lebih dari 5.700 data unik. Sistem membandingkan efisiensi waktu eksekusi antara pencarian DFS pada Tree dengan pencarian langsung menggunakan Hash Map.
+Proyek ini bertujuan untuk mensimulasikan sistem manajemen kategori pada skala industri menggunakan dataset dari Online Retail II. Dataset tersebut diolah menjadi data kategori hierarkis dengan lebih dari 5.600 data unik. Sistem membandingkan efisiensi waktu eksekusi antara pencarian DFS pada Tree dengan pencarian langsung menggunakan Hash Map.
 
 ## Anggota Kelompok
 

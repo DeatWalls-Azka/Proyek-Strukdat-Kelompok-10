@@ -8,16 +8,14 @@
 
 using namespace std;
 
-// Definisi Struktur Data
 struct Kategori {
     int id_kategori;
     string nama;
     int parent_id;
     int level;
-    int status; // Sesuai permintaan Domain Data Minimal
-    vector<Kategori*> sub_kategori; 
+    int status; 
 
-    // Constructor sudah disesuaikan untuk menerima 5 parameter
+    vector<Kategori*> sub_kategori; 
     Kategori(int id, string n, int pid, int lvl, int st) 
         : id_kategori(id), nama(n), parent_id(pid), level(lvl), status(st) {}
 };
@@ -35,6 +33,7 @@ bool tambahKategoriDenganLevel(int id, string nama, int parent_id, int level, in
 bool pindahParentKategori(int id, int parent_id_baru);
 void hapusKategoriRecursive(int id);
 void urutkanKategori(vector<Kategori*>& list_kat);
+void urutkanKategoriById(vector<Kategori*>& list_kat);
 Kategori* cariDenganHash(int id_target);
 Kategori* cariKategoriDFS(const vector<Kategori*>& list_kat, int id_target);
 Kategori* cariDenganNama(const vector<Kategori*>& list_kat, string nama_target);

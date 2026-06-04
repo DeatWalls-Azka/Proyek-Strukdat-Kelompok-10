@@ -15,7 +15,6 @@ bool tambahKategoriDenganLevel(int id, string nama, int parent_id, int level, in
         return false;
     }
 
-    // Pastikan status dikirim ke constructor Kategori
     Kategori* baru = new Kategori(id, nama, parent_id, level, status);
     map_kategori[id] = baru;
 
@@ -123,12 +122,18 @@ void urutkanKategori(vector<Kategori*>& list_kat) {
     for (Kategori* kat : list_kat) urutkanKategori(kat->sub_kategori);
 }
 
-// Update: Menyimpan status (kolom ke-5) ke dalam file teks
+void urutkanKategoriById(vector<Kategori*>& list_kat) {
+    sort(list_kat.begin(), list_kat.end(), [](Kategori* a, Kategori* b) {
+        return a->id_kategori < b->id_kategori;
+    });
+    for (Kategori* kat : list_kat) urutkanKategoriById(kat->sub_kategori);
+}
+
 void simpanKeFileRekursif(ofstream& file, const vector<Kategori*>& list_kat) {
     for (Kategori* kat : list_kat) {
         file << kat->id_kategori << ";" << kat->nama << ";" 
              << kat->parent_id << ";" << kat->level << ";" 
-             << kat->status << "\n"; // Tambah status di sini
+             << kat->status << "\n"; 
         simpanKeFileRekursif(file, kat->sub_kategori);
     }
 }
@@ -141,7 +146,6 @@ void simpanData() {
     }
 }
 
-// Update: Membaca 5 kolom dari dataset_kategori.txt
 void muatData() {
     ifstream file(DATA_FILE);
     string id_s, nama, p_id_s, lvl_s, status_s;
@@ -150,8 +154,8 @@ void muatData() {
     while (getline(file, id_s, ';')) {
         if (!getline(file, nama, ';')) break;
         if (!getline(file, p_id_s, ';')) break;
-        if (!getline(file, lvl_s, ';')) break;   // Ubah delimiter ke ';' karena ada kolom status setelahnya
-        if (!getline(file, status_s, '\n')) break; // Status adalah kolom terakhir (sampai baris baru)
+        if (!getline(file, lvl_s, ';')) break;   
+        if (!getline(file, status_s, '\n')) break; 
         
         if (!id_s.empty()) {
             tambahKategoriDenganLevel(stoi(id_s), nama, stoi(p_id_s), stoi(lvl_s), stoi(status_s));
@@ -175,7 +179,6 @@ Kategori* cariKategoriDFS(const vector<Kategori*>& list_kat, int id_target) {
 
 void tampilkanHierarki(const vector<Kategori*>& list_kat, string indent) {
     for (Kategori* kat : list_kat) {
-        // Tambahkan info status (Aktif/Nonaktif) agar asdos melihat domain datanya lengkap
         string txt_status = (kat->status == 1) ? "Aktif" : "Nonaktif";
         cout << indent << "|-- [" << kat->id_kategori << "] " << kat->nama << " (" << txt_status << ")" << endl;
         tampilkanHierarki(kat->sub_kategori, indent + "    ");

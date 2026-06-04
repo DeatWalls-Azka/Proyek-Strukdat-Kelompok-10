@@ -11,7 +11,7 @@ using namespace std;
 
 // Fungsi Benchmark untuk Laporan Analisis Performa
 void jalankanBenchmark(int id_target) {
-    int n = 1000000;
+    int n = 100000;
     cout << "\n[Benchmarking] Mencari ID " << id_target << " sebanyak " << n << " kali..." << endl;
     
     // Uji Tree (DFS) - O(n)
@@ -390,17 +390,17 @@ int main() {
 
     do {
         cout << "\n============================================";
-        cout << "\n   FINAL PROJECT: SISTEM MONITORING KATEGORI";
+        cout << "\n FINAL PROJECT: SISTEM MONITORING KATEGORI";
         cout << "\n============================================";
         cout << "\n1. Tampilkan Hierarki Kategori";
-        cout << "\n2. Tambah Kategori Baru (+ Status)";
+        cout << "\n2. Tambah Kategori Baru ";
         cout << "\n3. Update Data Kategori";
         cout << "\n4. Hapus Kategori & Sub-Kategori";
-        cout << "\n5. Urutkan Kategori (A-Z)";
-        cout << "\n6. Uji Performa Pencarian (Benchmarking)";
+        cout << "\n5. Urutkan Kategori";
+        cout << "\n6. Pencarian Kategori";
         cout << "\n7. Monitoring Penggunaan Memori (RAM)";
-        cout << "\n8. Export Benchmark ke CSV";
-        cout << "\n9. Export Benchmark Pertumbuhan Data";
+        cout << "\n8. Export Benchmark Kedalaman level (CSV)";
+        cout << "\n9. Export Benchmark Pertumbuhan Data (CSV)";
         cout << "\n0. Simpan & Keluar";
         cout << "\n--------------------------------------------";
         cout << "\nPilih Menu: "; cin >> pilihan;
@@ -562,11 +562,27 @@ int main() {
                 } else cout << "[!] ID tidak ditemukan." << endl;
                 break;
 
-            case 5:
-                urutkanKategori(root_kategori);
-                simpanData();
-                cout << "[OK] Data diurutkan berdasarkan abjad." << endl;
+            case 5: {
+                int pilihan_urut;
+                cout << "\n--- MENU URUTKAN KATEGORI ---";
+                cout << "\n1. Urutkan A-Z";
+                cout << "\n2. Urutkan berdasarkan ID";
+                cout << "\nPilih Urutan: ";
+                cin >> pilihan_urut;
+
+                if (pilihan_urut == 1) {
+                    urutkanKategori(root_kategori);
+                    simpanData();
+                    cout << "[OK] Data diurutkan berdasarkan abjad." << endl;
+                } else if (pilihan_urut == 2) {
+                    urutkanKategoriById(root_kategori);
+                    simpanData();
+                    cout << "[OK] Data diurutkan berdasarkan ID." << endl;
+                } else {
+                    cout << "[!] Pilihan urutan tidak tersedia." << endl;
+                }
                 break;
+            }
 
             case 6: { // Di-bunder/dibungkus kurung kurawal agar terhindar dari compiler error initialization
                 cout << "\nPilih Metode Pencarian:\n1. Cari berdasarkan ID (Benchmark Tree vs Hash Map)\n2. Cari berdasarkan Nama\nPilihan: ";
@@ -593,19 +609,23 @@ int main() {
                     cin.ignore();
                     getline(cin, nama_target);
                     
-                    // Uji performa pencarian nama (DFS) menggunakan tracker waktu chrono
-                    auto mulai_nama = chrono::high_resolution_clock::now();
                     Kategori* hasil = cariDenganNama(root_kategori, nama_target);
-                    auto selesai_nama = chrono::high_resolution_clock::now();
-                    chrono::duration<double, micro> durasi_nama = selesai_nama - mulai_nama;
 
                     if (hasil) {
+                        string nama_parent = "-";
+                        if (hasil->parent_id == 0) {
+                            nama_parent = "Root";
+                        } else if (map_kategori.count(hasil->parent_id)) {
+                            nama_parent = map_kategori[hasil->parent_id]->nama;
+                        }
+
                         cout << "\n[DATA DITEMUKAN]" << endl;
                         cout << ">> ID Kategori   : " << hasil->id_kategori << endl;
+                        cout << ">> Nama          : " << hasil->nama << endl;
+                        cout << ">> Parent ID     : " << hasil->parent_id << endl;
+                        cout << ">> Parent Nama   : " << nama_parent << endl;
                         cout << ">> Level/Depth   : " << hasil->level << endl;
                         cout << ">> Status        : " << ((hasil->status == 1) ? "Aktif" : "Nonaktif") << endl;
-                        cout << "--------------------------------------" << endl;
-                        cout << ">> Waktu Cari Nama (DFS) : " << durasi_nama.count() << " mikrodetik" << endl;
                     } else {
                         cout << "\n[!] Kategori dengan nama '" << nama_target << "' tidak ditemukan.\n";
                     }
