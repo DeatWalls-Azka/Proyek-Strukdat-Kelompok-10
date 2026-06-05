@@ -238,10 +238,9 @@ void hitungEstimasiMemori() {
 
 Kategori* cariDenganNama(const vector<Kategori*>& list_kat, string nama_target) {
     for (Kategori* kat : list_kat) {
-        // Menggunakan pencarian case-insensitive atau exact match
+ 
         if (kat->nama == nama_target) return kat;
         
-        // Rekursif cari ke anak-anaknya
         Kategori* hasil = cariDenganNama(kat->sub_kategori, nama_target);
         if (hasil) return hasil;
     }
@@ -252,7 +251,6 @@ void tampilkanDaftarSubkategoriNonLeaf(const vector<Kategori*>& list_kat, string
 {
     for (Kategori* kat : list_kat)
     {
-        // Tampilkan hanya kategori/subkategori yang masih punya anak
         if (!kat->sub_kategori.empty())
         {
             cout << indent << "[" << kat->id_kategori << "] "
@@ -324,7 +322,6 @@ void tampilkanDataLeafRekursif(Kategori* kat, int& jumlah_data)
         return;
     }
 
-    // Kalau tidak punya anak, berarti ini data paling bawah / data produk
     if (kat->sub_kategori.empty())
     {
         cout << jumlah_data + 1 << ". "
@@ -337,8 +334,7 @@ void tampilkanDataLeafRekursif(Kategori* kat, int& jumlah_data)
         jumlah_data++;
         return;
     }
-
-    // Kalau masih punya anak, lanjut telusuri anak-anaknya
+    
     for (Kategori* anak : kat->sub_kategori)
     {
         tampilkanDataLeafRekursif(anak, jumlah_data);

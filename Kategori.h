@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 using namespace std;
-
+// Struktur data untuk kategori
 struct Kategori {
     int id_kategori;
     string nama;
@@ -20,11 +20,11 @@ struct Kategori {
         : id_kategori(id), nama(n), parent_id(pid), level(lvl), status(st) {}
 };
 
-// Deklarasi Storage Global (Supaya bisa diakses di main)
+// Variabel global untuk menyimpan kategori
 extern vector<Kategori*> root_kategori;
 extern unordered_map<int, Kategori*> map_kategori;
 
-// Prototype Fungsi
+// Fungsi untuk mengelola kategori
 void muatData();
 void simpanData();
 

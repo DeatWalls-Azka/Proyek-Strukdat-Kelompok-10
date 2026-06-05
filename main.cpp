@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// Fungsi Benchmark untuk Laporan Analisis Performa
+// Fungsi Benchmark 
 void jalankanBenchmark(int id_target) {
     int n = 100000;
     cout << "\n[Benchmarking] Mencari ID " << id_target << " sebanyak " << n << " kali..." << endl;
@@ -382,7 +382,6 @@ void exportBenchmarkKeCSV() {
 }
 
 int main() {
-    // Memuat data dari file saat program dijalankan
     muatData();
     
     int pilihan, id, p_id, status_input;
@@ -602,7 +601,7 @@ int main() {
                 break;
             }
 
-            case 6: { // Di-bunder/dibungkus kurung kurawal agar terhindar dari compiler error initialization
+            case 6: { 
                 cout << "\nPilih Metode Pencarian:\n1. Cari berdasarkan ID (Benchmark Tree vs Hash Map)\n2. Cari berdasarkan Nama\nPilihan: ";
                 int pil_cari;
                 cin >> pil_cari;
@@ -612,7 +611,6 @@ int main() {
                     cout << "Masukkan ID Kategori: ";
                     cin >> id_target;
                     
-                    // Validasi eksistensi data ID sebelum di-benchmark
                     if (map_kategori.count(id_target)) {
                         cout << "\n[DATA DITEMUKAN]" << endl;
                         cout << ">> Nama Kategori : " << map_kategori[id_target]->nama << endl;
@@ -648,7 +646,7 @@ int main() {
                         cout << "\n[!] Kategori dengan nama '" << nama_target << "' tidak ditemukan.\n";
                     }
                 }
-                break; // Menghindari bug fall-through ke case 7
+                break; 
             }
 
             case 7:
